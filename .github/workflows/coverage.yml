@@ -99,11 +99,8 @@ jobs:
               await github.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                title: `[${context.payload.inputs.issue_prefix || 'Test Coverage'}]: Fix tests in branch ${context.ref}.`,
-                body: `Auto-generated issue by ${context.workflow}(${context.eventName}).
-
-                    ${JSON.stringify(result.summary, null, '\t')}
-                `,
+                title: `[${context.payload.inputs.issue_prefix || 'Test Coverage'}]: Fix tests in branch "${context.ref}".`,
+                body: `Auto-generated issue by ${context.workflow}(${context.eventName}).\n\n\n${JSON.stringify(result.summary, null, '\t')}`,
                 assignees: (context.payload.inputs.assignees || context.actor).split(','),
                 labels: ['automation', 'development', 'bug'].concat((context.payload.inputs.labels || []).split(',')).filter((e,i,a) => a.indexOf(e) === i)
               })
