@@ -88,7 +88,7 @@ jobs:
             const result = JSON.parse(await fs.promises.readFile(path.resolve('test-results', `test-result-${testRunId}.json`), 'utf8'))
             console.log(result.summary)
 
-            // create issue on fail
+            /* create issue on fail
             if (result.summary.failing > 0) {
               // const bodySummary = '```javascript\n' + JSON.stringify(result.summary, null, '\t') + '\n```'
 
@@ -102,7 +102,7 @@ jobs:
                 assignees: (context.payload.inputs.assignees || context.actor).split(','),
                 labels: ['automation', 'development', 'bug'].concat(context.payload.inputs.labels || []).filter((e,i,a) => a.indexOf(e) === i)
               })
-            }
+            }*/
         
 
 
