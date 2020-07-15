@@ -71,6 +71,7 @@ jobs:
           node_modules/sfdx-cli/bin/run force:auth:jwt:grant --clientid ${{ secrets.ORIGIN_CONSUMER_KEY }} --jwtkeyfile server.key --username ${ORG_USERNAME} --setdefaultdevhubusername -a currentorg
 
       - name: Run all org tests
+        continue-on-error: true
         run: |
           mkdir test-results
           SFDX_IMPROVED_CODE_COVERAGE='true' node_modules/sfdx-cli/bin/run force:apex:test:run -d test-results -r json -c -u currentorg
