@@ -62,9 +62,9 @@ jobs:
           ORG_NAME: ${{ github.event.inputs.org }}
         run: | 
           echo ::set-env name=USERNAME::"${ORG_NAME^^}_USERNAME"
-          echo "$USERNAME"
+          echo "${USERNAME}"
           echo ::set-env name=CONSUMER_KEY::"${ORG_NAME^^}_CONSUMER_KEY"
-          echo "$CONSUMER_KEY"
+          echo "${CONSUMER_KEY}"
           echo ::set-output name=username::${{ secrets[env.USERNAME] }}
           echo ::set-output name=consumer-key::${{ secrets[env.CONSUMER_KEY] }}
 
