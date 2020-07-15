@@ -74,7 +74,7 @@ jobs:
         continue-on-error: true
         run: |
           mkdir test-results
-          # SFDX_IMPROVED_CODE_COVERAGE='true' node_modules/sfdx-cli/bin/run force:apex:test:run -d test-results -r json -c -u currentorg
+          SFDX_IMPROVED_CODE_COVERAGE='true' node_modules/sfdx-cli/bin/run force:apex:test:run -d test-results -r json -c -u currentorg
   
       - name: Get test run summary
         id: result
