@@ -1,0 +1,108 @@
+name: Coverage
+on:
+  workflow_dispatch:
+    inputs:
+      org:
+        required: true
+        description: org name. Default origin.
+        default: 'origin'
+      assignees:
+        required: false
+        description: comma-separated list of assignee to assign in fail test issue
+      issue_prefix:
+        required: false
+        description: an issue prefix to create
+      labels:
+        required: false
+        description: comma-separated list of labels to add
+        
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ env.GITHUB_REF }}
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '13.x'
+
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: Install Salesforce CLI
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: |
+          npm install sfdx-cli
+          node_modules/sfdx-cli/bin/run --version
+          node_modules/sfdx-cli/bin/run plugins --core
+
+      - name: Convert inputs
+        id: secrets
+        env:
+          ORG_NAME: ${{ github.event.inputs.org }}
+        run: |
+          USERNAME="${ORG_NAME^^}_USERNAME"
+          echo ::set-output name=username::$USERNAME
+
+      - name: Setup job environment
+        env:
+          USERNAME: ${{ steps.secrets.outputs.username }}
+        run: | 
+          echo ::set-env name=ORG_USERNAME::${{ secrets[env.USERNAME] }}
+
+      - name: Authenticate Org
+        env:
+          SALESFORCE_JWT_SECRET_KEY: ${{ secrets.UTILS_JWT_SECRET_KEY }}
+        run: |
+          echo "${SALESFORCE_JWT_SECRET_KEY}" > server.key
+          echo "${ORG_USERNAME}"
+          node_modules/sfdx-cli/bin/run force:auth:jwt:grant --clientid ${{ secrets.SF_UTILS_CONSUMER_KEY }} --jwtkeyfile server.key --username ${ORG_USERNAME} --setdefaultdevhubusername -a currentorg
+
+      - name: Run all org tests
+        run: |
+          mkdir test-results
+          SFDX_IMPROVED_CODE_COVERAGE='true' node_modules/sfdx-cli/bin/run force:apex:test:run -d test-results -r json -c -u currentorg
+  
+      - name: Get test run summary
+        id: result
+        uses: actions/github-script@v2
+        with:
+          script: |
+            const fs = require('fs')
+            const path = require('path')
+            const testRunId = await fs.promises.readFile(path.resolve('test-results', 'test-run-id.txt'), 'utf8')
+            console.log(testRunId)
+            const result = JSON.parse(await fs.promises.readFile(path.resolve('test-results', `test-result-${testRunId}.json`), 'utf8'))
+
+            // create issue on fail
+            if (result.summary.failing > 0) {
+              const bodySummary = '```javascript\n' + JSON.stringify(result.summary, null, '\t') + '\n```'
+
+              await github.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `[${context.payload.inputs.issue_prefix || Test Coverage}]: Fix tests in branch ${context.ref}.`,
+                body: `
+                    Auto-generated issue by ${context.workflow}(${context.eventName}).
+
+                    ${bodySummary}
+                `,
+                assignees: (context.payload.inputs.assignees || context.actor).split(','),
+                labels: ['automation', 'development', 'bug'].concat(context.payload.inputs.labels || []).filter((e,i,a) => a.indexOf(e) === i)
+              })
+            }
+        
+
+
