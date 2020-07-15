@@ -84,15 +84,15 @@ jobs:
             const fs = require('fs')
             const path = require('path')
             const testRunId = await fs.promises.readFile(path.resolve('test-results', 'test-run-id.txt'), 'utf8')
-            console.log(testRunId)
             const result = JSON.parse(await fs.promises.readFile(path.resolve('test-results', `test-result-${testRunId}.json`), 'utf8'))
+            console.log('------------SUMMARY--------------')
             console.log(result.summary)
 
             // create issue on fail
             if (result.summary.failing > 0) {
               const code = '```';
               const fails = result.tests.filter(test => test.Outcome === 'Fail')
-              console.log('------------------------')
+              console.log('------------FAILS--------------')
               console.log(fails.map(test => {
                 return `Method: ${test.FullName}\nTrace: ${test.StackTrace}\nMessage: ${test.Message}`
               }).join('\n'))
