@@ -55,16 +55,19 @@ jobs:
           echo $CONSUMER_KEY
           echo ::set-output name=username::$USERNAME
           echo ::set-output name=consumer-key::$CONSUMER_KEY
+          echo ::set-env name=USERNAME::$USERNAME
+          echo ::set-env name=CONSUMER_KEY::$CONSUMER_KEY
 
       - name: Credentials
         id: creds
         env:
-          ORG_NAME: ${{ github.event.inputs.org }}
+          USERNAME_OUTPUT: ${{ steps.secrets-var.outputs.username }}
+          CONSUMER_KEY_OUTPUT: ${{ steps.secrets-var.outputs.consumer-key }}
         run: | 
-          echo ::set-env name=USERNAME::"${ORG_NAME^^}_USERNAME"
           echo "${USERNAME}"
-          echo ::set-env name=CONSUMER_KEY::"${ORG_NAME^^}_CONSUMER_KEY"
           echo "${CONSUMER_KEY}"
+          echo "${USERNAME_OUTPUT}"
+          echo "${CONSUMER_KEY_OUTPUT}"
           echo ::set-output name=username::${{ secrets[env.USERNAME] }}
           echo ::set-output name=consumer-key::${{ secrets[env.CONSUMER_KEY] }}
 
