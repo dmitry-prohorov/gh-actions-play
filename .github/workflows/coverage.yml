@@ -74,7 +74,7 @@ jobs:
         continue-on-error: true
         run: |
           mkdir test-results
-          SFDX_IMPROVED_CODE_COVERAGE='true' node_modules/sfdx-cli/bin/run force:apex:test:run -d test-results -r json -c -u currentorg
+          # SFDX_IMPROVED_CODE_COVERAGE='true' node_modules/sfdx-cli/bin/run force:apex:test:run -d test-results -r json -c -u currentorg
   
       - name: Get test run summary
         id: result
@@ -83,9 +83,15 @@ jobs:
           script: |
             const fs = require('fs')
             const path = require('path')
-            const testRunId = await fs.promises.readFile(path.resolve('test-results', 'test-run-id.txt'), 'utf8')
+            const testRunId = '123'
+            // await fs.promises.readFile(path.resolve('test-results', 'test-run-id.txt'), 'utf8')
             console.log(testRunId)
-            const result = JSON.parse(await fs.promises.readFile(path.resolve('test-results', `test-result-${testRunId}.json`), 'utf8'))
+            const result = { 
+              summary: {
+                failing: 10
+              }
+            }
+            // JSON.parse(await fs.promises.readFile(path.resolve('test-results', `test-result-${testRunId}.json`), 'utf8'))
             console.log(result.summary)
 
             // create issue on fail
@@ -95,7 +101,7 @@ jobs:
               await github.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                title: `[${context.payload.inputs.issue_prefix || Test Coverage}]: Fix tests in branch ${context.ref}.`,
+                title: `[${context.payload.inputs.issue_prefix || 'Test Coverage'}]: Fix tests in branch ${context.ref}.`,
                 body: `
                     Auto-generated issue by ${context.workflow}(${context.eventName}).
                 `,
