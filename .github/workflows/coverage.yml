@@ -94,9 +94,11 @@ jobs:
               const fails = result.tests.filter(test => test.Outcome === 'Fail')
               console.log('------------FAILS--------------')
               fails.forEach(test => {
-                console.group(`%cMethod:${test.FullName}`, 'font-style: italic');
-                console.log('%cTrace:', 'color:yellow', test.StackTrace);
-                console.log('%cMessage:', 'color:red', test.Message);
+                console.group(`Method: ${test.FullName}`);
+                console.group(`Trace:\n${test.StackTrace}`);
+                console.groupEnd();
+                console.log(`Message: ${test.Message}`);
+                console.groupEnd();
               })
               const issueFails = fails.map(test => {
                 return `- [ ] ${test.FullName}`
