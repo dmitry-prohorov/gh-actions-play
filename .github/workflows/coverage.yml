@@ -96,11 +96,12 @@ jobs:
 
             // create issue on fail
             if (result.summary.failing > 0) {
+              const code = '```';
               await github.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 title: `[${context.payload.inputs.issue_prefix || 'Test Coverage'}]: Fix tests in branch "${context.ref}".`,
-                body: `Auto-generated issue by ${context.workflow}(${context.eventName}).\n\n\n${JSON.stringify(result.summary, null, '\t')}`,
+                body: `Auto-generated issue by ${context.workflow}(${context.eventName}).\n\n\n${code}javascript\n${JSON.stringify(result.summary, null, '  ')}\n${code}`,
                 assignees: (context.payload.inputs.assignees || context.actor).split(','),
                 labels: ['automation', 'development', 'bug'].concat((context.payload.inputs.labels || []).split(',')).filter((e,i,a) => a.indexOf(e) === i)
               })
