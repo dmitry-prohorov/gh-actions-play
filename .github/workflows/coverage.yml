@@ -104,6 +104,8 @@ jobs:
                 title: `[${context.payload.inputs.issue_prefix || 'Test Coverage'}]: Fix tests in branch ${context.ref}.`,
                 body: `
                     Auto-generated issue by ${context.workflow}(${context.eventName}).
+                    
+                    ${bodySummary}
                 `,
                 assignees: (context.payload.inputs.assignees || context.actor).split(','),
                 labels: ['automation', 'development', 'bug'].concat((context.payload.inputs.labels || []).split(',')).filter((e,i,a) => a.indexOf(e) === i)
