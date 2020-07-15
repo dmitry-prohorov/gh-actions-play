@@ -44,37 +44,31 @@ jobs:
 #           node_modules/sfdx-cli/bin/run --version
 #           node_modules/sfdx-cli/bin/run plugins --core
 
-      - name: Convert org name to secret variables
+      - name: Convert inputs
+        id: secrets
         env:
           ORG_NAME: ${{ github.event.inputs.org }}
         run: |
           USERNAME="${ORG_NAME^^}_USERNAME"
           CONSUMER_KEY="${ORG_NAME^^}_CONSUMER_KEY"
-          echo ::set-env name=USERNAME::$USERNAME
-          echo ::set-env name=CONSUMER_KEY::$CONSUMER_KEY
+          echo ::set-output name=username::$USERNAME
+          echo ::set-output name=consumer-key::$CONSUMER_KEY
 
-      - name: Credentials
-        id: creds
+      - name: Set dynamic secrets to environment
         env:
-          ORG_NAME: ${{ github.event.inputs.org }}
+          USERNAME: ${{ steps.secrets.outputs.username }}
+          CONSUMER_KEY: ${{ steps.secrets.outputs.consumer-key }}
         run: | 
-          echo "${USERNAME}"
-          echo "${CONSUMER_KEY}"
-          USERNAME_LOCAL="${ORG_NAME^^}_USERNAME"
-          CONSUMER_KEY_LOCAL="${ORG_NAME^^}_CONSUMER_KEY"
-          echo ::set-env name=USERNAME_LOCAL_ENV::$USERNAME_LOCAL
-          echo ::set-env name=CONSUMER_KEY_LOCAL_ENV::$CONSUMER_KEY_LOCAL
-          echo "${USERNAME_LOCAL_ENV}"
-          echo "${CONSUMER_KEY_LOCAL_ENV}"
-          echo ::set-output name=username::${{ secrets[env.USERNAME_LOCAL_ENV] }}
-          echo ::set-output name=consumer-key::${{ secrets[env.CONSUMER_KEY_LOCAL_ENV] }}
+          echo ::set-env name=ORG_USERNAME::${{ secrets[env.USERNAME] }}
+          echo ::set-env name=ORG_CONSUMER_KEY::${{ secrets[env.CONSUMER_KEY] }}
 
       - name: Authenticate Org
         env:
           SALESFORCE_JWT_SECRET_KEY: ${{ secrets.UTILS_JWT_SECRET_KEY }}
         run: |
           echo "${SALESFORCE_JWT_SECRET_KEY}" > server.key
-          node_modules/sfdx-cli/bin/run force:auth:jwt:grant --clientid ${{ secrets.SF_UTILS_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ steps.creds.outputs.username }} --setdefaultdevhubusername -a currentorg
+          echo "${ORG_USERNAME}"
+          node_modules/sfdx-cli/bin/run force:auth:jwt:grant --clientid ${{ secrets.SF_UTILS_CONSUMER_KEY }} --jwtkeyfile server.key --username ${ORG_USERNAME} --setdefaultdevhubusername -a currentorg
 
 #       - name: Prepare libs
 #         env:
