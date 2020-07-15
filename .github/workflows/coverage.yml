@@ -90,7 +90,7 @@ jobs:
 
             // create issue on fail
             if (result.summary.failing > 0) {
-              const bodySummary = '```javascript\n' + JSON.stringify(result.summary, null, '\t') + '\n```'
+              // const bodySummary = '```javascript\n' + JSON.stringify(result.summary, null, '\t') + '\n```'
 
               await github.issues.create({
                 owner: context.repo.owner,
@@ -98,8 +98,6 @@ jobs:
                 title: `[${context.payload.inputs.issue_prefix || Test Coverage}]: Fix tests in branch ${context.ref}.`,
                 body: `
                     Auto-generated issue by ${context.workflow}(${context.eventName}).
-
-                    ${bodySummary}
                 `,
                 assignees: (context.payload.inputs.assignees || context.actor).split(','),
                 labels: ['automation', 'development', 'bug'].concat(context.payload.inputs.labels || []).filter((e,i,a) => a.indexOf(e) === i)
