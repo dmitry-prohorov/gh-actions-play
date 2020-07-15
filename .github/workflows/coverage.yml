@@ -83,15 +83,9 @@ jobs:
           script: |
             const fs = require('fs')
             const path = require('path')
-            const testRunId = '123'
-            // await fs.promises.readFile(path.resolve('test-results', 'test-run-id.txt'), 'utf8')
+            const testRunId = await fs.promises.readFile(path.resolve('test-results', 'test-run-id.txt'), 'utf8')
             console.log(testRunId)
-            const result = { 
-              summary: {
-                failing: 10
-              }
-            }
-            // JSON.parse(await fs.promises.readFile(path.resolve('test-results', `test-result-${testRunId}.json`), 'utf8'))
+            const result = JSON.parse(await fs.promises.readFile(path.resolve('test-results', `test-result-${testRunId}.json`), 'utf8'))
             console.log(result.summary)
 
             // create issue on fail
