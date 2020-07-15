@@ -4,17 +4,17 @@ on:
     inputs:
       org:
         required: true
-        description: org name. Default origin.
+        description: Org name.
         default: 'origin'
       assignees:
         required: false
-        description: comma-separated list of assignee to assign in fail test issue
+        description: Comma-separated list of assignee to assign in fail test issue
       issue_prefix:
         required: false
-        description: an issue prefix to create
+        description: An issue prefix to create
       labels:
         required: false
-        description: comma-separated list of labels to add
+        description: Comma-separated list of labels to add
         
 
 jobs:
