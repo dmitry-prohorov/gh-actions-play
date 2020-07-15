@@ -50,7 +50,9 @@ jobs:
           ORG_NAME: ${{ github.event.inputs.org }}
         run: |
           USERNAME="${ORG_NAME^^}_USERNAME"
+          echo $USERNAME
           CONSUMER_KEY="${ORG_NAME^^}_CONSUMER_KEY"
+          echo $CONSUMER_KEY
           echo ::set-output name=username::$USERNAME
           echo ::set-output name=consumer-key::$CONSUMER_KEY
 
