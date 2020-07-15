@@ -93,9 +93,11 @@ jobs:
               const code = '```';
               const fails = result.tests.filter(test => test.Outcome === 'Fail')
               console.log('------------FAILS--------------')
-              console.log(fails.map(test => {
-                return `Method: ${test.FullName}\nTrace: ${test.StackTrace}\nMessage: ${test.Message}`
-              }).join('\n'))
+              fails.forEach(test => {
+                console.group(`%cMethod:${test.FullName}`, 'font-style: italic');
+                console.log('%cTrace:', 'color:yellow', test.StackTrace);
+                console.log('%cMessage:', 'color:red', test.Message);
+              })
               const issueFails = fails.map(test => {
                 return `- [ ] ${test.FullName}`
               }).join('\n')
@@ -104,7 +106,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 title: `[${context.payload.inputs.issue_prefix || 'Test Coverage'}]: Fix tests in branch "${context.ref}".`,
-                body: `Auto-generated issue by ${context.workflow}(${context.eventName}).\n\n\n### Summary\n${code}javascript\n${JSON.stringify(result.summary, null, '  ')}\n${code}\n\n### Fails:\n${issueFails}\n\n###[Details](${logUrl})`,
+                body: `Auto-generated issue by ${context.workflow}(${context.eventName}).\n\n\n### Summary\n${code}javascript\n${JSON.stringify(result.summary, null, '  ')}\n${code}\n\n### Fails:\n${issueFails}\n\n### [Details](${logUrl})`,
                 assignees: (context.payload.inputs.assignees || context.actor).split(','),
                 labels: ['automation', 'development', 'bug'].concat((context.payload.inputs.labels || '').split(',')).filter((e,i,a) => e && a.indexOf(e) === i)
               })
