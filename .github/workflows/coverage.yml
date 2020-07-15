@@ -86,6 +86,7 @@ jobs:
             const testRunId = await fs.promises.readFile(path.resolve('test-results', 'test-run-id.txt'), 'utf8')
             console.log(testRunId)
             const result = JSON.parse(await fs.promises.readFile(path.resolve('test-results', `test-result-${testRunId}.json`), 'utf8'))
+            console.log(result.summary)
 
             // create issue on fail
             if (result.summary.failing > 0) {
