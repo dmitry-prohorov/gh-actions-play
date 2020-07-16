@@ -1,0 +1,17 @@
+# todo: add config file and assigne based on it and label
+name: AutoAssigner
+
+on:
+  issues:
+    types: [opened]
+    
+
+jobs:
+  assign:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assign labels
+        uses: actions/github-script@v2
+        with:
+          script: |
+            console.log(context)
