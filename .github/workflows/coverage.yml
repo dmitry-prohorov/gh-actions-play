@@ -97,7 +97,7 @@ jobs:
               await github.issues.createComment({ 
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                issue_nubmer: context.payload.inputs.issue_number,
+                issue_nubmer: `${context.payload.inputs.issue_number}`,
                 body: JSON.stringify(result.summary, null, '  ')
               })
             }
