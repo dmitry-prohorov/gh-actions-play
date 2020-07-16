@@ -92,15 +92,6 @@ jobs:
             // JSON.parse(await fs.promises.readFile(path.resolve('test-results', `test-result-${testRunId}.json`), 'utf8'))
             console.log('------------SUMMARY--------------')
             console.log(result.summary)
-            
-            if (context.payload.inputs.issue_number) {
-              await github.issues.createComment({ 
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: `${context.payload.inputs.issue_number}`,
-                body: JSON.stringify(result.summary, null, '  ')
-              })
-            }
 
             if (result.summary.failing > 0) {
               const code = '```';
@@ -123,7 +114,7 @@ jobs:
                 body: `Auto-generated message by ${context.workflow}(${context.eventName}).\n\n\n### Summary\n${code}javascript\n${JSON.stringify(result.summary, null, '  ')}\n${code}\n\n### Fails:\n${issueFails}\n\n### [Details](${logUrl})`,
               }
               if (context.payload.inputs.issue_number) {
-                await github.issues.createComment({ ...request, issue_number: context.payload.inputs.issue_number})
+                await github.issues.createComment({ ...request, issue_number: `${context.payload.inputs.issue_number}`})
               } else {
                 await github.issues.create({
                   ...request,
@@ -132,6 +123,23 @@ jobs:
                   labels: ['automation', 'development', 'bug'].concat((context.payload.inputs.labels || '').split(',')).filter((e,i,a) => e && a.indexOf(e) === i)
                 })
               }
+            } else if (context.payload.inputs.issue_number) {
+              const request = {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: `${context.payload.inputs.issue_number}`,
+              }
+              
+              // update comment with success response
+              await github.issues.createComment({ 
+                ...request,
+                body: JSON.stringify(result.summary, null, '  ')
+              })
+              // close issue
+              await github.issues.update({ 
+                ...request
+                state: 'closed'
+              })
             }
         
 
