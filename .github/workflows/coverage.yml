@@ -15,6 +15,9 @@ on:
       labels:
         required: false
         description: Comma-separated list of labels to add
+      issue_number:
+        required: false
+        description: Id(number) ussue to update
         
 
 jobs:
@@ -88,7 +91,6 @@ jobs:
             console.log('------------SUMMARY--------------')
             console.log(result.summary)
 
-            // create issue on fail
             if (result.summary.failing > 0) {
               const code = '```';
               const fails = result.tests.filter(test => test.Outcome === 'Fail')
@@ -104,14 +106,21 @@ jobs:
                 return `- [ ] ${test.FullName}`
               }).join('\n')
               const logUrl = `${context.payload.repository.html_url}/actions/runs/${process.env.GITHUB_RUN_ID}`
-              await github.issues.create({
+              const request = {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                title: `[${context.payload.inputs.issue_prefix || 'Test Coverage'}]: Fix tests in branch "${context.ref}".`,
-                body: `Auto-generated issue by ${context.workflow}(${context.eventName}).\n\n\n### Summary\n${code}javascript\n${JSON.stringify(result.summary, null, '  ')}\n${code}\n\n### Fails:\n${issueFails}\n\n### [Details](${logUrl})`,
-                assignees: (context.payload.inputs.assignees || context.actor).split(','),
-                labels: ['automation', 'development', 'bug'].concat((context.payload.inputs.labels || '').split(',')).filter((e,i,a) => e && a.indexOf(e) === i)
-              })
+                body: `Auto-generated message by ${context.workflow}(${context.eventName}).\n\n\n### Summary\n${code}javascript\n${JSON.stringify(result.summary, null, '  ')}\n${code}\n\n### Fails:\n${issueFails}\n\n### [Details](${logUrl})`,
+              }
+              if (context.payload.inputs.issue_number) {
+                await github.issues.createComment({ ...request, issue_nubmer: context.payload.inputs.issue_number})
+              } else {
+                await github.issues.create({
+                  ...request,
+                  title: `[${context.payload.inputs.issue_prefix || 'Test Coverage'}]: Fix tests in branch "${context.ref}".`,
+                  assignees: (context.payload.inputs.assignees || context.actor).split(','),
+                  labels: ['automation', 'development', 'bug'].concat((context.payload.inputs.labels || '').split(',')).filter((e,i,a) => e && a.indexOf(e) === i)
+                })
+              }
             }
         
 
