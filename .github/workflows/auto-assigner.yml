@@ -23,7 +23,7 @@ jobs:
             await github.issues.update({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: `${context.payload.issue.nubmer}`,
+              issue_number: context.payload.issue.number,
               assignees: [context.actor].concat(context.payload.issue.assignees).filter((e,i,a) => e && a.indexOf(e) === i),
               labels: labels.concat(context.payload.issue.labels).filter((e,i,a) => e && a.indexOf(e) === i)
             })
