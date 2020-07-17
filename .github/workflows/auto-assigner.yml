@@ -13,7 +13,7 @@ jobs:
       - name: Assign labels
         uses: actions/github-script@v2
         with:
-          github-token: ${{ DPRO_TOKEN }}
+          github-token: ${{ secrets.DPRO_TOKEN }}
           script: |
             const labels = []
             const assignees = [context.actor]
