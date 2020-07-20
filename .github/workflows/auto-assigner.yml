@@ -30,7 +30,7 @@ jobs:
               repo: context.repo.repo,
               issue_number: context.payload.issue.number,
               assignees: assignees.concat(context.payload.issue.assignees.map(assignee => assignee.login)).filter((e,i,a) => e && a.indexOf(e) === i),
-              labels: labels.concat(context.payload.issue.labels).filter((e,i,a) => e && a.indexOf(e) === i)
+              labels: labels.concat(context.payload.issue.labels.map(label => label.name)).filter((e,i,a) => e && a.indexOf(e) === i)
             }
             console.log(request)
             await github.issues.update(request)
