@@ -39,7 +39,7 @@ jobs:
 
       - name: Get changed files
         id: file_changes
-        uses: dmitry-prohorov/file-changes-action@latest
+        uses: dmitry-prohorov/file-changes-action
 
       - name: Check files
         env:
@@ -48,6 +48,7 @@ jobs:
           files_modified: ${{ steps.file_changes.outputs.files_modified }}
           files_removed: ${{ steps.file_changes.outputs.files_removed }}
           files_renamed: ${{ steps.file_changes.outputs.files_renamed }}
+          files_previous: ${{ steps.file_changes.outputs.files_previous }}
         run: |
           echo "${files}"
           echo "${files_added}"
