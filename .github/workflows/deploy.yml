@@ -42,18 +42,18 @@ jobs:
         uses: trilom/file-changes-action@v1.2.4
 
       - name: Check files
-        with:
+        env:
           files: ${{ steps.file_changes.outputs.files }}
-          files-added: ${{ steps.file_changes.outputs.files_added }}
-          files-modified: ${{ steps.file_changes.outputs.files_modified }}
-          files-removed: ${{ steps.file_changes.outputs.files_removed }}
-          files-renamed: ${{ steps.file_changes.outputs.files_renamed }}
+          files_added: ${{ steps.file_changes.outputs.files_added }}
+          files_modified: ${{ steps.file_changes.outputs.files_modified }}
+          files_removed: ${{ steps.file_changes.outputs.files_removed }}
+          files_renamed: ${{ steps.file_changes.outputs.files_renamed }}
         run: |
           echo "${files}"
-          echo "${files-added}"
-          echo "${files-modified}"
-          echo "${files-removed}"
-          echo "${files-renamed}"
+          echo "${files_added}"
+          echo "${files_modified}"
+          echo "${files_removed}"
+          echo "${files_renamed}"
       # - name: Install Salesforce CLI
       #   if: steps.cache-node-modules.outputs.cache-hit != 'true'
       #   run: |
