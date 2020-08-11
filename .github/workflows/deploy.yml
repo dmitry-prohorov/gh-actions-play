@@ -1,0 +1,68 @@
+# This is a basic workflow to help you get started with Actions
+
+name: DevelopCI
+
+# Controls when the action will run. Triggers the workflow on push
+# events but only for the develop branch
+on:
+  push:
+    branches: "master"
+    paths:
+      - "force-app/**"
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "deploy"
+  deploy:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: "13.x"
+      # - name: Cache node modules
+      #   id: cache-node-modules
+      #   uses: actions/cache@v2
+      #   env:
+      #     cache-name: cache-node-modules
+      #   with:
+      #     path: "**/node_modules"
+      #     key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-build-${{ env.cache-name }}-
+      #       ${{ runner.os }}-build-
+      #       ${{ runner.os }}-
+
+      - name: Get changed files
+        id: file_changes
+        uses: trilom/file-changes-action@v1.2.4
+
+      - name: Check files
+        with:
+          files: ${{ steps.file_changes.outputs.files }}
+          files-added: ${{ steps.file_changes.outputs.files_added }}
+          files-modified: ${{ steps.file_changes.outputs.files_modified }}
+          files-removed: ${{ steps.file_changes.outputs.files_removed }}
+          files-renamed: ${{ steps.file_changes.outputs.files_renamed }}
+        run: |
+          echo "${files}"
+          echo "${files-added}"
+          echo "${files-modified}"
+          echo "${files-removed}"
+          echo "${files-renamed}"
+      # - name: Install Salesforce CLI
+      #   if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      #   run: |
+      #     npm install sfdx-cli
+      #     node_modules/sfdx-cli/bin/run --version
+      #     node_modules/sfdx-cli/bin/run plugins --core
+      # - name: Authenticate test automation org
+      #   run: |
+      #     echo "${SALESFORCE_JWT_SECRET_KEY}" > server.key
+      #     node_modules/sfdx-cli/bin/run force:auth:jwt:grant --clientid ${{ secrets.SF_UTILS_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.AUTOMATION_ORG_USERNAME}} --setdefaultdevhubusername -a automation
+      #   env:
+      #     SALESFORCE_JWT_SECRET_KEY: ${{ secrets.UTILS_JWT_SECRET_KEY }}
