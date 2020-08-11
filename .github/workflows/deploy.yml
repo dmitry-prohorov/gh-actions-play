@@ -39,7 +39,7 @@ jobs:
 
       - name: Get changed files
         id: file_changes
-        uses: dmitry-prohorov/file-changes-action
+        uses: dmitry-prohorov/file-changes-action@master
 
       - name: Check files
         env:
