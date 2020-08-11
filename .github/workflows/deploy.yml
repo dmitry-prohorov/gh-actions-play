@@ -55,6 +55,7 @@ jobs:
           echo "${files_modified}"
           echo "${files_removed}"
           echo "${files_renamed}"
+          echo "${files_previous}"
       # - name: Install Salesforce CLI
       #   if: steps.cache-node-modules.outputs.cache-hit != 'true'
       #   run: |
