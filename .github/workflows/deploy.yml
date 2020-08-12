@@ -42,6 +42,7 @@ jobs:
         uses: dmitry-prohorov/file-changes-action@master
 
       - name: Check files
+        uses: actions/github-script@v2
         env:
           files: ${{ steps.file_changes.outputs.files }}
           files_added: ${{ steps.file_changes.outputs.files_added }}
@@ -49,13 +50,14 @@ jobs:
           files_removed: ${{ steps.file_changes.outputs.files_removed }}
           files_renamed: ${{ steps.file_changes.outputs.files_renamed }}
           files_previous: ${{ steps.file_changes.outputs.files_previous }}
-        run: |
-          echo "${files}"
-          echo "${files_added}"
-          echo "${files_modified}"
-          echo "${files_removed}"
-          echo "${files_renamed}"
-          echo "${files_previous}"
+        with:
+          script: |
+            console.log('files', process.env.files);
+            console.log('files_added', process.env.files_added);
+            console.log('files_modified', process.env.files_modified);
+            console.log('files_removed', process.env.files_removed);
+            console.log('files_renamed', process.env.files_renamed);
+            console.log('files_previous', process.env.files_previous);
       # - name: Install Salesforce CLI
       #   if: steps.cache-node-modules.outputs.cache-hit != 'true'
       #   run: |
