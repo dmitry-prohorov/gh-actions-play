@@ -66,36 +66,35 @@ jobs:
             const previous = JSON.parse(process.env.files_previous);
             console.log(Array.isArray(added));
 
-            const deployMetadata = new Set([...added, ...modified, ...renamed].map((file) => {
-              if (file.includes('/aura/') || file.includes('/lwc/') || file.includes('/staticresources/')) {
-                const filePathParts = path.dirname(file).split(path.sep);
-                console.log(filePathParts);
-                const metadataFolderIndex = (filePathParts.includes('aura') && filePathParts.indexOf('aura'))
-                  || (filePathParts.includes('lwc') && filePathParts.indexOf('lwc'))
-                  || (filePathParts.includes('staticresources') && filePathParts.indexOf('staticresources'));
-                console.log(metadataFolderIndex);
-                const metadataPath = filePathParts.slice(0, metadataFolderIndex + 2).join(path.sep);
-                console.log(metadataPath);
-                return metadataPath;
+            function isSpecificMetadataPath(file) {
+              return file.includes('/aura/') || file.includes('/lwc/') || file.includes('/staticresources/');
+            }
+            function getSpecificMetadataPath(file) {
+              const filePathParts = path.dirname(file).split(path.sep);
+              const metadataFolderIndex = (filePathParts.includes('aura') && filePathParts.indexOf('aura'))
+                || (filePathParts.includes('lwc') && filePathParts.indexOf('lwc'))
+                || (filePathParts.includes('staticresources') && filePathParts.indexOf('staticresources'));
+              return filePathParts.slice(0, metadataFolderIndex + 2).join(path.sep);
+            }
+
+            let deployMetadata = new Set([...added, ...modified, ...renamed]);
+
+            const deleteMetadata = new Set(previous.map((file) => isSpecificMetadataPath(file) && getSpecificMetadataPath(file) || file));
+
+            removed.forEach((file) => {
+              if (isSpecificMetadataPath(file)) {
+                const metadataPath = getSpecificMetadataPath(file);
+                if (path.extname(file) === '.xml') {
+                  deleteMetadata.add(metadataPath);
+                } else {
+                  deployMetadata.add(metadataPath)
+                }
+              } else {
+                deleteMetadata.add(file);
               }
+            });
 
-              return file;
-            }));
-
-            const deleteMetadata = [...removed, ...previous].map((file) => {
-              if (path.extname(file) === '.xml' && (file.includes('/aura/') || file.includes('/lwc/') || file.includes('/staticresources/'))) {
-                const filePathParts = path.dirname(file).split(path.sep);
-                const metadataFolderIndex = (filePathParts.includes('aura') && filePathParts.indexOf('aura'))
-                  || (filePathParts.includes('lwc') && filePathParts.indexOf('lwc'))
-                  || (filePathParts.includes('staticresources') && filePathParts.indexOf('staticresources'));
-                const metadataPath = filePathParts.slice(0, metadataFolderIndex + 2).join(path.sep);
-                metadataPath.delete(metadataPath);
-                return metadataPath;
-              }
-
-              return file;
-            })
-
+            deployMetadata = new Set([...deployMetadata].filter((file) => !deleteMetadata.has(file)));
             console.log(deployMetadata);
             console.log(deleteMetadata);
       # - name: Install Salesforce CLI
