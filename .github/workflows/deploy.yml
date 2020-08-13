@@ -59,8 +59,14 @@ jobs:
             console.log('files_renamed', process.env.files_renamed);
             console.log('files_previous', process.env.files_previous);
             const path = require('path');
+            const added = JSON.parse(process.env.files_added);
+            const modified = JSON.parse(process.env.files_modified);
+            const renamed = JSON.parse(process.env.files_renamed);
+            const removed = JSON.parse(process.env.files_removed);
+            const previous = JSON.parse(process.env.files_previous);
+            console.log(Array.isArray(added));
 
-            const deployMetadata = new Set([...process.env.files_added, ...process.env.files_modified, ...process.env.files_renamed].map((file) => {
+            const deployMetadata = new Set([...added, ...modified, ...renamed].map((file) => {
               if (file.includes('/aura/') || file.includes('/lwc/') || file.includes('/staticresources/')) {
                 const filePathParts = path.dirname(file).split(path.sep);
                 const metadataFolderIndex = filePathParts.indexOf('aura') || filePathParts.indexOf('lwc') || filePathParts.indexOf('staticresources');
@@ -70,7 +76,7 @@ jobs:
               return file;
             }));
 
-            const deleteMetadata = [...process.env.files_removed, ...process.env.files_previous].map((file) => {
+            const deleteMetadata = [...removed, ...previous].map((file) => {
               if (path.extname(file) === '.xml' && (file.includes('/aura/') || file.includes('/lwc/') || file.includes('/staticresources/'))) {
                 const filePathParts = path.dirname(file).split(path.sep);
                 const metadataFolderIndex = filePathParts.indexOf('aura') || filePathParts.indexOf('lwc') || filePathParts.indexOf('staticresources');
