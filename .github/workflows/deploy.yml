@@ -69,8 +69,12 @@ jobs:
             const deployMetadata = new Set([...added, ...modified, ...renamed].map((file) => {
               if (file.includes('/aura/') || file.includes('/lwc/') || file.includes('/staticresources/')) {
                 const filePathParts = path.dirname(file).split(path.sep);
+                console.log(filePathParts);
                 const metadataFolderIndex = filePathParts.indexOf('aura') || filePathParts.indexOf('lwc') || filePathParts.indexOf('staticresources');
-                return filePathParts.slice(0, metadataFolderIndex + 2).join(path.sep);
+                console.log(metadataFolderIndex);
+                const metadataPath = filePathParts.slice(0, metadataFolderIndex + 2).join(path.sep);
+                console.log(metadataPath);
+                return metadataPath;
               }
 
               return file;
