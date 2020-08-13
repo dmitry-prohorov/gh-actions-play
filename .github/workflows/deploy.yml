@@ -85,7 +85,7 @@ jobs:
             }
             function getStaticresourceMetadataPath(file) {
               if (path.extname(file) === '.xml') {
-                return path.relative(path.dirname(file), path.basename(file).split('.')[0])
+                return path.join(path.dirname(file), path.basename(file).split('.')[0])
               }
               return getCommonMetadataPath(file);
             }
