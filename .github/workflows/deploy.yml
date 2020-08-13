@@ -70,7 +70,9 @@ jobs:
               if (file.includes('/aura/') || file.includes('/lwc/') || file.includes('/staticresources/')) {
                 const filePathParts = path.dirname(file).split(path.sep);
                 console.log(filePathParts);
-                const metadataFolderIndex = filePathParts.indexOf('aura') || filePathParts.indexOf('lwc') || filePathParts.indexOf('staticresources');
+                const metadataFolderIndex = (filePathParts.includes('aura') && filePathParts.indexOf('aura'))
+                  || (filePathParts.includes('lwc') && filePathParts.indexOf('lwc'))
+                  || (filePathParts.includes('staticresources') && filePathParts.indexOf('staticresources'));
                 console.log(metadataFolderIndex);
                 const metadataPath = filePathParts.slice(0, metadataFolderIndex + 2).join(path.sep);
                 console.log(metadataPath);
@@ -83,7 +85,9 @@ jobs:
             const deleteMetadata = [...removed, ...previous].map((file) => {
               if (path.extname(file) === '.xml' && (file.includes('/aura/') || file.includes('/lwc/') || file.includes('/staticresources/'))) {
                 const filePathParts = path.dirname(file).split(path.sep);
-                const metadataFolderIndex = filePathParts.indexOf('aura') || filePathParts.indexOf('lwc') || filePathParts.indexOf('staticresources');
+                const metadataFolderIndex = (filePathParts.includes('aura') && filePathParts.indexOf('aura'))
+                  || (filePathParts.includes('lwc') && filePathParts.indexOf('lwc'))
+                  || (filePathParts.includes('staticresources') && filePathParts.indexOf('staticresources'));
                 const metadataPath = filePathParts.slice(0, metadataFolderIndex + 2).join(path.sep);
                 metadataPath.delete(metadataPath);
                 return metadataPath;
