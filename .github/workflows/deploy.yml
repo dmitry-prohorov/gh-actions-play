@@ -76,33 +76,34 @@ jobs:
               return isLightningMetadataPath (file) || isStaticresourceMetadataPath(file);
             }
 
-            function getSpecificMetadataPath(file) {
+            function getCommonMetadataPath(file) {
               const filePathParts = path.dirname(file).split(path.sep);
               const metadataFolderIndex = (filePathParts.includes('aura') && filePathParts.indexOf('aura'))
                 || (filePathParts.includes('lwc') && filePathParts.indexOf('lwc'))
                 || (filePathParts.includes('staticresources') && filePathParts.indexOf('staticresources'));
               return filePathParts.slice(0, metadataFolderIndex + 2).join(path.sep);
             }
+            function getStaticresourceMetadataPath(file) {
+              if (path.extname(file) === '.xml') {
+                return file.split('.')[0];
+              }
+              return getCommonMetadataPath(file);
+            }
+            function getMetadataPath(file) {
+              return (isLightningMetadataPath(file) && getCommonMetadataPath(file))
+                || (isStaticresourceMetadataPath(file) && getStaticresourceMetadataPath(file))
+                || file;
+            }
 
-            let deployMetadata = new Set([...added, ...modified, ...renamed].map((file) =>
-              isSpecificMetadataPath(file) && getSpecificMetadataPath(file) || file));
+            let deployMetadata = new Set([...added, ...modified, ...renamed].map((file) => getMetadataPath(file)));
 
-            const deleteMetadata = new Set(previous.map((file) =>
-              isSpecificMetadataPath(file) && getSpecificMetadataPath(file) || file));
+            const deleteMetadata = new Set(previous.map((file) => getMetadataPath(file)));
 
             removed.forEach((file) => {
-              if (isSpecificMetadataPath(file)) {
-                if (path.extname(file) === '.xml') {
-                  if (isLightningMetadataPath(file)) {
-                    deleteMetadata.add(getSpecificMetadataPath(file));
-                  } else {
-                    deleteMetadata.add(file.split('.')[0]);
-                  }
-                } else {
-                  deployMetadata.add(getSpecificMetadataPath(file));
-                }
+              if (isSpecificMetadataPath(file) && path.extname(file) !== '.xml') {
+                deployMetadata.add(getCommonMetadataPath(file));
               } else {
-                deleteMetadata.add(file);
+                deleteMetadata.add(getMetadataPath(file));
               }
             });
 
