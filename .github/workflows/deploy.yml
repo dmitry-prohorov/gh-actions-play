@@ -77,7 +77,7 @@ jobs:
               return filePathParts.slice(0, metadataFolderIndex + 2).join(path.sep);
             }
 
-            let deployMetadata = new Set([...added, ...modified, ...renamed]);
+            let deployMetadata = new Set([...added, ...modified, ...renamed].map((file) => isSpecificMetadataPath(file) && getSpecificMetadataPath(file) || file));
 
             const deleteMetadata = new Set(previous.map((file) => isSpecificMetadataPath(file) && getSpecificMetadataPath(file) || file));
 
