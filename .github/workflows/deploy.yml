@@ -58,6 +58,32 @@ jobs:
             console.log('files_removed', process.env.files_removed);
             console.log('files_renamed', process.env.files_renamed);
             console.log('files_previous', process.env.files_previous);
+            const path = require('path');
+
+            const deployMetadata = new Set([...process.env.files_added, ...process.env.files_modified, ...process.env.files_renamed].map((file) => {
+              if (file.includes('/aura/') || file.includes('/lwc/') || file.includes('/staticresources/')) {
+                const filePathParts = path.dirname(file).split(path.sep);
+                const metadataFolderIndex = filePathParts.indexOf('aura') || filePathParts.indexOf('lwc') || filePathParts.indexOf('staticresources');
+                return filePathParts.slice(0, metadataFolderIndex + 2).join(path.sep);
+              }
+
+              return file;
+            }));
+
+            const deleteMetadata = [...process.env.files_removed, ...process.env.files_previous].map((file) => {
+              if (path.extname(file) === '.xml' && (file.includes('/aura/') || file.includes('/lwc/') || file.includes('/staticresources/'))) {
+                const filePathParts = path.dirname(file).split(path.sep);
+                const metadataFolderIndex = filePathParts.indexOf('aura') || filePathParts.indexOf('lwc') || filePathParts.indexOf('staticresources');
+                const metadataPath = filePathParts.slice(0, metadataFolderIndex + 2).join(path.sep);
+                metadataPath.delete(metadataPath);
+                return metadataPath;
+              }
+
+              return file;
+            })
+
+            console.log(deployMetadata);
+            console.log(deleteMetadata);
       # - name: Install Salesforce CLI
       #   if: steps.cache-node-modules.outputs.cache-hit != 'true'
       #   run: |
