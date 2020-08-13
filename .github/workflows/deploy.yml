@@ -66,9 +66,16 @@ jobs:
             const previous = JSON.parse(process.env.files_previous);
             console.log(Array.isArray(added));
 
-            function isSpecificMetadataPath(file) {
-              return file.includes('/aura/') || file.includes('/lwc/') || file.includes('/staticresources/');
+            function isLightningMetadataPath(file) {
+              return  file.includes('/aura/') || file.includes('/lwc/');
             }
+            function isStaticresourceMetadataPath(file) {
+              return file.includes('/staticresources/');
+            }
+            function isSpecificMetadataPath(file) {
+              return isLightningMetadataPath (file) || isStaticresourceMetadataPath(file);
+            }
+
             function getSpecificMetadataPath(file) {
               const filePathParts = path.dirname(file).split(path.sep);
               const metadataFolderIndex = (filePathParts.includes('aura') && filePathParts.indexOf('aura'))
@@ -85,11 +92,14 @@ jobs:
 
             removed.forEach((file) => {
               if (isSpecificMetadataPath(file)) {
-                const metadataPath = getSpecificMetadataPath(file);
                 if (path.extname(file) === '.xml') {
-                  deleteMetadata.add(metadataPath);
+                  if (isLightningMetadataPath(file)) {
+                    deleteMetadata.add(getSpecificMetadataPath(file));
+                  } else {
+                    deleteMetadata.add(file.split('.')[0]);
+                  }
                 } else {
-                  deployMetadata.add(metadataPath)
+                  deployMetadata.add(getSpecificMetadataPath(file));
                 }
               } else {
                 deleteMetadata.add(file);
