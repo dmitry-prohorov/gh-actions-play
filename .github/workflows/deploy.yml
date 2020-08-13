@@ -73,7 +73,7 @@ jobs:
               return file.includes('/staticresources/');
             }
             function isSpecificMetadataPath(file) {
-              return isLightningMetadataPath (file) || isStaticresourceMetadataPath(file);
+              return isLightningMetadataPath(file) || isStaticresourceMetadataPath(file);
             }
 
             function getCommonMetadataPath(file) {
