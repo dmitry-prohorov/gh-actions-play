@@ -39,6 +39,7 @@ jobs:
         run: |
           FIRST_COMMIT=$(git rev-list --max-parents=0 HEAD)
           echo "$FIRST_COMMIT"
+          echo "$GITHUB_SHA"
           echo ::set-env name=ORG_USERNAME::${{ secrets[env.USERNAME] }}
           echo ::set-env name=ORG_CONSUMER_KEY::${{ secrets[env.CONSUMER_KEY] }}
           if [ "$START_SHA" != "" ]; then
