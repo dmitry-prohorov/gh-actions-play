@@ -108,6 +108,7 @@ jobs:
         with:
           node-version: "13.x"
       - name: Cache node modules
+        if: needs.prepare.outputs.deploy-paths != '""'
         id: cache-node-modules
         uses: actions/cache@v2
         env:
