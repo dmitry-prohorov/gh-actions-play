@@ -28,6 +28,7 @@ jobs:
           script: |
             const startSha = context.payload.inputs.start;
             const endSha = context.payload.inputs.end || context.sha;
+            console.log(context.payload.inputs.org.toUpperCase())
             console.log(process.env.SECRETS[`${context.payload.inputs.org.toUpperCase()}_USERNAME`])
             console.log(process.env.SECRETS[`${context.payload.inputs.org.toUpperCase()}_CONSUMER_KEY`])
             core.exportVariable('ORG_USERNAME', process.env.SECRETS[`${context.payload.inputs.org.toUpperCase()}_USERNAME`])
