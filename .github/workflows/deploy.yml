@@ -139,6 +139,7 @@ jobs:
       - name: Checkout to previous state
         if: steps.check.outputs.delete-paths != '""'
         uses: actions/checkout@v2
+        with:
           ref: ${{ context.payload.before }}
 
       - name: Delete
