@@ -1,5 +1,4 @@
-public with sharing class NewClass {
-    public NewClass() {
-
-    }
+public with sharing class NewClassRenamed {
+  public NewClassRenamed() {
+  }
 }
