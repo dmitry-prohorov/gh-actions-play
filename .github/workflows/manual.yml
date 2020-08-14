@@ -54,7 +54,7 @@ jobs:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
           echo "$GITHUB_CONTEXT"
-          FIRST_COMMIT="git rev-list --max-parents=0 HEAD"
+          FIRST_COMMIT="${git rev-list --max-parents=0 HEAD}"
           echo "$FIRST_COMMIT"
       # - name: Cache node modules
       #   id: cache-node-modules
