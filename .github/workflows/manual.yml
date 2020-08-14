@@ -20,6 +20,7 @@ jobs:
       delete-paths: ${{ steps.check.outputs.delete-paths }}
       deploy-paths: ${{ steps.check.outputs.deploy-paths }}
     steps:
+      - uses: actions/checkout@v2
       - name: Convert inputs
         id: secrets
         env:
