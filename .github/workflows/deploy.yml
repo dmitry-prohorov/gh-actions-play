@@ -54,6 +54,7 @@ jobs:
           files_previous: ${{ steps.file_changes.outputs.files_previous }}
         with:
           script: |
+            console.log(context)
             console.log('files', process.env.files);
             console.log('files_added', process.env.files_added);
             console.log('files_modified', process.env.files_modified);
