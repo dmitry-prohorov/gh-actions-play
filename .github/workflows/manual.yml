@@ -17,6 +17,32 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      # - name: Convert inputs
+      #   id: secrets
+      #   env:
+      #     ORG_NAME: ${{ github.event.inputs.org }}
+      #   run: |
+      #     USERNAME="${ORG_NAME^^}_USERNAME"
+      #     CONSUMER_KEY="${ORG_NAME^^}_CONSUMER_KEY"
+      #     echo ::set-output name=username::$USERNAME
+      #     echo ::set-output name=consumer-key::$CONSUMER_KEY
+      # - name: Setup job environment
+      #   env:
+      #     USERNAME: ${{ steps.secrets.outputs.username }}
+      #     CONSUMER_KEY: ${{ steps.secrets.outputs.consumer-key }}
+      #     START_SHA: ${{ github.event.inputs.start }}
+      #     END_SHA: ${{ github.event.inputs.end }}
+      #   run: |
+      #     echo ::set-env name=ORG_USERNAME::${{ secrets[env.USERNAME] }}
+      #     echo ::set-env name=ORG_CONSUMER_KEY::${{ secrets[env.CONSUMER_KEY] }}
+      #     if [ "$START_SHA" != "" ]; then
+      #       echo ::set-env name=START_SHA::$START_SHA
+      #     fi
+      #     if [ "$END_SHA" != "" ]; then
+      #       echo ::set-env name=END_SHA::$END_SHA
+      #     elif
+      #       echo ::set-env name=END_SHA::$GITHUB_SHA
+      #     fi
       - uses: actions/checkout@v2
         with:
           ref: ${{ env.GITHUB_REF }}
@@ -28,7 +54,8 @@ jobs:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
           echo "$GITHUB_CONTEXT"
-          git rev-list --max-parents=0 HEAD
+          FIRST_COMMIT="git rev-list --max-parents=0 HEAD"
+          echo "$FIRST_COMMIT"
       # - name: Cache node modules
       #   id: cache-node-modules
       #   uses: actions/cache@v2
