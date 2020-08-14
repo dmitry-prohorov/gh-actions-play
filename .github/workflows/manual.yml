@@ -31,108 +31,105 @@ jobs:
           echo ::set-output name=username::$USERNAME
           echo ::set-output name=consumer-key::$CONSUMER_KEY
       - name: Setup job environment
+        uses: actions/github-script@v2
         env:
           USERNAME: ${{ steps.secrets.outputs.username }}
           CONSUMER_KEY: ${{ steps.secrets.outputs.consumer-key }}
-          START_SHA: ${{ github.event.inputs.start }}
-          END_SHA: ${{ github.event.inputs.end }}
-        run: |
-          FIRST_COMMIT=$(git rev-list --max-parents=0 HEAD)
-          echo "$FIRST_COMMIT"
-          echo "$GITHUB_SHA"
-          echo ::set-env name=ORG_USERNAME::${{ secrets[env.USERNAME] }}
-          echo ::set-env name=ORG_CONSUMER_KEY::${{ secrets[env.CONSUMER_KEY] }}
-          if [ "$START_SHA" != "" ]; then
-            echo ::set-env name=START_SHA::$START_SHA
-          elif
-            echo ::set-env name=START_SHA::"$FIRST_COMMIT"
-          fi
-          if [ "$END_SHA" != "" ]; then
-            echo ::set-env name=END_SHA::$END_SHA
-          elif
-            echo ::set-env name=END_SHA::$GITHUB_SHA
-          fi
-      - uses: actions/checkout@v2
-        with:
-          ref: ${{ env.END_SHA }}
-      - name: Get changed files
-        id: file_changes
-        uses: dmitry-prohorov/file-changes-action@master
-      - name: Check files
-        id: check
-        uses: actions/github-script@v2
-        env:
-          files: ${{ steps.file_changes.outputs.files }}
-          files_added: ${{ steps.file_changes.outputs.files_added }}
-          files_modified: ${{ steps.file_changes.outputs.files_modified }}
-          files_removed: ${{ steps.file_changes.outputs.files_removed }}
-          files_renamed: ${{ steps.file_changes.outputs.files_renamed }}
-          files_previous: ${{ steps.file_changes.outputs.files_previous }}
         with:
           script: |
-            console.log(context)
-            console.log('files', process.env.files);
-            console.log('files_added', process.env.files_added);
-            console.log('files_modified', process.env.files_modified);
-            console.log('files_removed', process.env.files_removed);
-            console.log('files_renamed', process.env.files_renamed);
-            console.log('files_previous', process.env.files_previous);
-            const path = require('path');
-            const added = JSON.parse(process.env.files_added);
-            const modified = JSON.parse(process.env.files_modified);
-            const renamed = JSON.parse(process.env.files_renamed);
-            const removed = JSON.parse(process.env.files_removed);
-            const previous = JSON.parse(process.env.files_previous);
-            console.log(Array.isArray(added));
-
-            function isLightningMetadataPath(file) {
-              return  file.includes('/aura/') || file.includes('/lwc/');
-            }
-            function isStaticresourceMetadataPath(file) {
-              return file.includes('/staticresources/');
-            }
-            function isSpecificMetadataPath(file) {
-              return isLightningMetadataPath(file) || isStaticresourceMetadataPath(file);
-            }
-
-            function getCommonMetadataPath(file) {
-              const filePathParts = path.dirname(file).split(path.sep);
-              const metadataFolderIndex = (filePathParts.includes('aura') && filePathParts.indexOf('aura'))
-                || (filePathParts.includes('lwc') && filePathParts.indexOf('lwc'))
-                || (filePathParts.includes('staticresources') && filePathParts.indexOf('staticresources'));
-              return filePathParts.slice(0, metadataFolderIndex + 2).join(path.sep);
-            }
-            function getStaticresourceMetadataPath(file) {
-              if (path.extname(file) === '.xml') {
-                return path.join(path.dirname(file), path.basename(file).split('.')[0])
-              }
-              return getCommonMetadataPath(file);
-            }
-            function getMetadataPath(file) {
-              return (isLightningMetadataPath(file) && getCommonMetadataPath(file))
-                || (isStaticresourceMetadataPath(file) && getStaticresourceMetadataPath(file))
-                || file;
-            }
-
-            let deployMetadata = new Set([...added, ...modified, ...renamed].map((file) => getMetadataPath(file)));
-
-            const deleteMetadata = new Set(previous.map((file) => getMetadataPath(file)));
-
-            removed.forEach((file) => {
-              if (isSpecificMetadataPath(file) && path.extname(file) !== '.xml') {
-                deployMetadata.add(getCommonMetadataPath(file));
-              } else {
-                deleteMetadata.add(getMetadataPath(file));
-              }
-            });
-
-            deployMetadata = new Set([...deployMetadata].filter((file) => !deleteMetadata.has(file)));
-
-            console.log(deployMetadata)
-            console.log(deleteMetadata)
-            core.setOutput('deploy-paths', `"${Array.from(deployMetadata).join(', \\\n')}"`)
-            core.setOutput('delete-paths', `"${Array.from(deleteMetadata).join(', \\\n')}"`)
-  # deploy:
+            const startSha = context.payload.inputs.start;
+            const endSha = context.payload.inputs.end;
+            console.log(secrets)
+        # run: |
+        #   FIRST_COMMIT=$(git rev-list --max-parents=0 HEAD)
+        #   echo "$FIRST_COMMIT"
+        #   echo "$GITHUB_SHA"
+        #   echo ::set-env name=ORG_USERNAME::${{ secrets[env.USERNAME] }}
+        #   echo ::set-env name=ORG_CONSUMER_KEY::${{ secrets[env.CONSUMER_KEY] }}
+        #   if [ "$START_SHA" != "" ]; then
+        #     echo ::set-env name=START_SHA::$START_SHA
+        #   elif
+        #     echo ::set-env name=START_SHA::"$FIRST_COMMIT"
+        #   fi
+        #   if [ "$END_SHA" != "" ]; then
+        #     echo ::set-env name=END_SHA::$END_SHA
+        #   elif
+        #     echo ::set-env name=END_SHA::$GITHUB_SHA
+        #   fi
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         ref: ${{ env.END_SHA }}
+  #     - name: Get changed files
+  #       id: file_changes
+  #       uses: dmitry-prohorov/file-changes-action@master
+  #     - name: Check files
+  #       id: check
+  #       uses: actions/github-script@v2
+  #       env:
+  #         files: ${{ steps.file_changes.outputs.files }}
+  #         files_added: ${{ steps.file_changes.outputs.files_added }}
+  #         files_modified: ${{ steps.file_changes.outputs.files_modified }}
+  #         files_removed: ${{ steps.file_changes.outputs.files_removed }}
+  #         files_renamed: ${{ steps.file_changes.outputs.files_renamed }}
+  #         files_previous: ${{ steps.file_changes.outputs.files_previous }}
+  #       with:
+  #         script: |
+  #           console.log(context)
+  #           console.log('files', process.env.files);
+  #           console.log('files_added', process.env.files_added);
+  #           console.log('files_modified', process.env.files_modified);
+  #           console.log('files_removed', process.env.files_removed);
+  #           console.log('files_renamed', process.env.files_renamed);
+  #           console.log('files_previous', process.env.files_previous);
+  #           const path = require('path');
+  #           const added = JSON.parse(process.env.files_added);
+  #           const modified = JSON.parse(process.env.files_modified);
+  #           const renamed = JSON.parse(process.env.files_renamed);
+  #           const removed = JSON.parse(process.env.files_removed);
+  #           const previous = JSON.parse(process.env.files_previous);
+  #           console.log(Array.isArray(added));
+  #           function isLightningMetadataPath(file) {
+  #             return  file.includes('/aura/') || file.includes('/lwc/');
+  #           }
+  #           function isStaticresourceMetadataPath(file) {
+  #             return file.includes('/staticresources/');
+  #           }
+  #           function isSpecificMetadataPath(file) {
+  #             return isLightningMetadataPath(file) || isStaticresourceMetadataPath(file);
+  #           }
+  #           function getCommonMetadataPath(file) {
+  #             const filePathParts = path.dirname(file).split(path.sep);
+  #             const metadataFolderIndex = (filePathParts.includes('aura') && filePathParts.indexOf('aura'))
+  #               || (filePathParts.includes('lwc') && filePathParts.indexOf('lwc'))
+  #               || (filePathParts.includes('staticresources') && filePathParts.indexOf('staticresources'));
+  #             return filePathParts.slice(0, metadataFolderIndex + 2).join(path.sep);
+  #           }
+  #           function getStaticresourceMetadataPath(file) {
+  #             if (path.extname(file) === '.xml') {
+  #               return path.join(path.dirname(file), path.basename(file).split('.')[0])
+  #             }
+  #             return getCommonMetadataPath(file);
+  #           }
+  #           function getMetadataPath(file) {
+  #             return (isLightningMetadataPath(file) && getCommonMetadataPath(file))
+  #               || (isStaticresourceMetadataPath(file) && getStaticresourceMetadataPath(file))
+  #               || file;
+  #           }
+  #           let deployMetadata = new Set([...added, ...modified, ...renamed].map((file) => getMetadataPath(file)));
+  #           const deleteMetadata = new Set(previous.map((file) => getMetadataPath(file)));
+  #           removed.forEach((file) => {
+  #             if (isSpecificMetadataPath(file) && path.extname(file) !== '.xml') {
+  #               deployMetadata.add(getCommonMetadataPath(file));
+  #             } else {
+  #               deleteMetadata.add(getMetadataPath(file));
+  #             }
+  #           });
+  #           deployMetadata = new Set([...deployMetadata].filter((file) => !deleteMetadata.has(file)));
+  #           console.log(deployMetadata)
+  #           console.log(deleteMetadata)
+  #           core.setOutput('deploy-paths', `"${Array.from(deployMetadata).join(', \\\n')}"`)
+  #           core.setOutput('delete-paths', `"${Array.from(deleteMetadata).join(', \\\n')}"`)
+  # # deploy:
   #   runs-on: ubuntu-latest
   #   steps:
   #     - name: Convert inputs
