@@ -26,6 +26,8 @@ jobs:
       - name: Context
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: |
+          echo "$GITHUB_CONTEXT"
       # - name: Cache node modules
       #   id: cache-node-modules
       #   uses: actions/cache@v2
