@@ -136,6 +136,11 @@ jobs:
         run: |
           node_modules/sfdx-cli/bin/run force:source:deploy -p ${{ steps.check.outputs.deploy-paths }} -u automation
 
+      - name: Checkout to previous state
+        if: steps.check.outputs.delete-paths != '""'
+        uses: actions/checkout@v2
+          ref: ${{ context.payload.before }}
+
       - name: Delete
         if: steps.check.outputs.delete-paths != '""'
         run: |
