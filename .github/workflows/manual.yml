@@ -20,32 +20,18 @@ jobs:
       delete-paths: ${{ steps.check.outputs.delete-paths }}
       deploy-paths: ${{ steps.check.outputs.deploy-paths }}
     steps:
-      - uses: actions/checkout@v2
-      - name: Convert inputs
-        id: secrets
-        env:
-          ORG_NAME: ${{ github.event.inputs.org }}
-        run: |
-          USERNAME="${ORG_NAME^^}_USERNAME"
-          CONSUMER_KEY="${ORG_NAME^^}_CONSUMER_KEY"
-          echo ::set-output name=username::$USERNAME
-          echo ::set-output name=consumer-key::$CONSUMER_KEY
-          echo ::set-output name=sha::$FIRST_COMMIT
       - name: Setup job environment
         uses: actions/github-script@v2
         env:
-          USERNAME: ${{ steps.secrets.outputs.username }}
-          CONSUMER_KEY: ${{ steps.secrets.outputs.consumer-key }}
           SECRETS: ${{ toJson(secrets) }}
-          FIRST_COMMIT: ${{ steps.secrets.outputs.sha }}
-          GITHUB_SHA: ${{ github.sha }}
         with:
           script: |
-            const startSha = context.payload.inputs.start || '378e6f0c5fc56f6e1f91c7bc1f5bc4bd9df1db51';
-            const endSha = context.payload.inputs.end || process.env.GITHUB_SHA;
-
-            core.exportVariable('ORG_USERNAME', process.env.SECRETS[process.env.USERNAME])
-            core.exportVariable('ORG_CONSUMER_KEY', process.env.SECRETS[process.env.CONSUMER_KEY])
+            const startSha = context.payload.inputs.start;
+            const endSha = context.payload.inputs.end || context.sha;
+            console.log(process.env.SECRETS[`${context.payload.inputs.org.toUpperCase()}_USERNAME`])
+            console.log(process.env.SECRETS[`${context.payload.inputs.org.toUpperCase()}_CONSUMER_KEY`])
+            core.exportVariable('ORG_USERNAME', process.env.SECRETS[`${context.payload.inputs.org.toUpperCase()}_USERNAME`])
+            core.exportVariable('ORG_CONSUMER_KEY', process.env.SECRETS[`${context.payload.inputs.org.toUpperCase()}_CONSUMER_KEY`])
             core.exportVariable('START_SHA', startSha)
             core.exportVariable('END_SHA', endSha)
         # run: |
@@ -64,82 +50,82 @@ jobs:
         #   elif
         #     echo ::set-env name=END_SHA::$GITHUB_SHA
         #   fi
-      - uses: actions/checkout@v2
-        with:
-          ref: ${{ env.END_SHA }}
-      - name: Get changed files
-        id: file_changes
-        uses: dmitry-prohorov/file-changes-action@master
-        with:
-          pushBefore: ${{ env.START_SHA }}
-          pushAfter: ${{ env.END_SHA }}
-      - name: Check files
-        id: check
-        uses: actions/github-script@v2
-        env:
-          files: ${{ steps.file_changes.outputs.files }}
-          files_added: ${{ steps.file_changes.outputs.files_added }}
-          files_modified: ${{ steps.file_changes.outputs.files_modified }}
-          files_removed: ${{ steps.file_changes.outputs.files_removed }}
-          files_renamed: ${{ steps.file_changes.outputs.files_renamed }}
-          files_previous: ${{ steps.file_changes.outputs.files_previous }}
-        with:
-          script: |
-            console.log(context)
-            console.log('files', process.env.files);
-            console.log('files_added', process.env.files_added);
-            console.log('files_modified', process.env.files_modified);
-            console.log('files_removed', process.env.files_removed);
-            console.log('files_renamed', process.env.files_renamed);
-            console.log('files_previous', process.env.files_previous);
-            const path = require('path');
-            const added = JSON.parse(process.env.files_added);
-            const modified = JSON.parse(process.env.files_modified);
-            const renamed = JSON.parse(process.env.files_renamed);
-            const removed = JSON.parse(process.env.files_removed);
-            const previous = JSON.parse(process.env.files_previous);
-            console.log(Array.isArray(added));
-            function isLightningMetadataPath(file) {
-              return  file.includes('/aura/') || file.includes('/lwc/');
-            }
-            function isStaticresourceMetadataPath(file) {
-              return file.includes('/staticresources/');
-            }
-            function isSpecificMetadataPath(file) {
-              return isLightningMetadataPath(file) || isStaticresourceMetadataPath(file);
-            }
-            function getCommonMetadataPath(file) {
-              const filePathParts = path.dirname(file).split(path.sep);
-              const metadataFolderIndex = (filePathParts.includes('aura') && filePathParts.indexOf('aura'))
-                || (filePathParts.includes('lwc') && filePathParts.indexOf('lwc'))
-                || (filePathParts.includes('staticresources') && filePathParts.indexOf('staticresources'));
-              return filePathParts.slice(0, metadataFolderIndex + 2).join(path.sep);
-            }
-            function getStaticresourceMetadataPath(file) {
-              if (path.extname(file) === '.xml') {
-                return path.join(path.dirname(file), path.basename(file).split('.')[0])
-              }
-              return getCommonMetadataPath(file);
-            }
-            function getMetadataPath(file) {
-              return (isLightningMetadataPath(file) && getCommonMetadataPath(file))
-                || (isStaticresourceMetadataPath(file) && getStaticresourceMetadataPath(file))
-                || file;
-            }
-            let deployMetadata = new Set([...added, ...modified, ...renamed].map((file) => getMetadataPath(file)));
-            const deleteMetadata = new Set(previous.map((file) => getMetadataPath(file)));
-            removed.forEach((file) => {
-              if (isSpecificMetadataPath(file) && path.extname(file) !== '.xml') {
-                deployMetadata.add(getCommonMetadataPath(file));
-              } else {
-                deleteMetadata.add(getMetadataPath(file));
-              }
-            });
-            deployMetadata = new Set([...deployMetadata].filter((file) => !deleteMetadata.has(file)));
-            console.log(deployMetadata)
-            console.log(deleteMetadata)
-            core.setOutput('deploy-paths', `"${Array.from(deployMetadata).join(', \\\n')}"`)
-            core.setOutput('delete-paths', `"${Array.from(deleteMetadata).join(', \\\n')}"`)
+      # - uses: actions/checkout@v2
+      #   with:
+      #     ref: ${{ env.END_SHA }}
+      # - name: Get changed files
+      #   id: file_changes
+      #   uses: dmitry-prohorov/file-changes-action@master
+      #   with:
+      #     pushBefore: ${{ env.START_SHA }}
+      #     pushAfter: ${{ env.END_SHA }}
+      # - name: Check files
+      #   id: check
+      #   uses: actions/github-script@v2
+      #   env:
+      #     files: ${{ steps.file_changes.outputs.files }}
+      #     files_added: ${{ steps.file_changes.outputs.files_added }}
+      #     files_modified: ${{ steps.file_changes.outputs.files_modified }}
+      #     files_removed: ${{ steps.file_changes.outputs.files_removed }}
+      #     files_renamed: ${{ steps.file_changes.outputs.files_renamed }}
+      #     files_previous: ${{ steps.file_changes.outputs.files_previous }}
+      #   with:
+      #     script: |
+      #       console.log(context)
+      #       console.log('files', process.env.files);
+      #       console.log('files_added', process.env.files_added);
+      #       console.log('files_modified', process.env.files_modified);
+      #       console.log('files_removed', process.env.files_removed);
+      #       console.log('files_renamed', process.env.files_renamed);
+      #       console.log('files_previous', process.env.files_previous);
+      #       const path = require('path');
+      #       const added = JSON.parse(process.env.files_added);
+      #       const modified = JSON.parse(process.env.files_modified);
+      #       const renamed = JSON.parse(process.env.files_renamed);
+      #       const removed = JSON.parse(process.env.files_removed);
+      #       const previous = JSON.parse(process.env.files_previous);
+      #       console.log(Array.isArray(added));
+      #       function isLightningMetadataPath(file) {
+      #         return  file.includes('/aura/') || file.includes('/lwc/');
+      #       }
+      #       function isStaticresourceMetadataPath(file) {
+      #         return file.includes('/staticresources/');
+      #       }
+      #       function isSpecificMetadataPath(file) {
+      #         return isLightningMetadataPath(file) || isStaticresourceMetadataPath(file);
+      #       }
+      #       function getCommonMetadataPath(file) {
+      #         const filePathParts = path.dirname(file).split(path.sep);
+      #         const metadataFolderIndex = (filePathParts.includes('aura') && filePathParts.indexOf('aura'))
+      #           || (filePathParts.includes('lwc') && filePathParts.indexOf('lwc'))
+      #           || (filePathParts.includes('staticresources') && filePathParts.indexOf('staticresources'));
+      #         return filePathParts.slice(0, metadataFolderIndex + 2).join(path.sep);
+      #       }
+      #       function getStaticresourceMetadataPath(file) {
+      #         if (path.extname(file) === '.xml') {
+      #           return path.join(path.dirname(file), path.basename(file).split('.')[0])
+      #         }
+      #         return getCommonMetadataPath(file);
+      #       }
+      #       function getMetadataPath(file) {
+      #         return (isLightningMetadataPath(file) && getCommonMetadataPath(file))
+      #           || (isStaticresourceMetadataPath(file) && getStaticresourceMetadataPath(file))
+      #           || file;
+      #       }
+      #       let deployMetadata = new Set([...added, ...modified, ...renamed].map((file) => getMetadataPath(file)));
+      #       const deleteMetadata = new Set(previous.map((file) => getMetadataPath(file)));
+      #       removed.forEach((file) => {
+      #         if (isSpecificMetadataPath(file) && path.extname(file) !== '.xml') {
+      #           deployMetadata.add(getCommonMetadataPath(file));
+      #         } else {
+      #           deleteMetadata.add(getMetadataPath(file));
+      #         }
+      #       });
+      #       deployMetadata = new Set([...deployMetadata].filter((file) => !deleteMetadata.has(file)));
+      #       console.log(deployMetadata)
+      #       console.log(deleteMetadata)
+      #       core.setOutput('deploy-paths', `"${Array.from(deployMetadata).join(', \\\n')}"`)
+      #       core.setOutput('delete-paths', `"${Array.from(deleteMetadata).join(', \\\n')}"`)
   # # deploy:
   #   runs-on: ubuntu-latest
   #   steps:
