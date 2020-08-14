@@ -71,6 +71,9 @@ jobs:
       - name: Get changed files
         id: file_changes
         uses: dmitry-prohorov/file-changes-action@master
+        with:
+          pushBefore: ${{ env.START_SHA }}
+          pushAfter: ${{ env.END_SHA }}
       - name: Check files
         id: check
         uses: actions/github-script@v2
