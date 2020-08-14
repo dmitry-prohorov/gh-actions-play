@@ -28,7 +28,6 @@ jobs:
         run: |
           USERNAME="${ORG_NAME^^}_USERNAME"
           CONSUMER_KEY="${ORG_NAME^^}_CONSUMER_KEY"
-          FIRST_COMMIT=$(git rev-list --max-parents=0 HEAD)
           echo ::set-output name=username::$USERNAME
           echo ::set-output name=consumer-key::$CONSUMER_KEY
           echo ::set-output name=sha::$FIRST_COMMIT
@@ -42,7 +41,7 @@ jobs:
           GITHUB_SHA: ${{ github.sha }}
         with:
           script: |
-            const startSha = context.payload.inputs.start || process.env.FIRST_COMMIT;
+            const startSha = context.payload.inputs.start || '378e6f0c5fc56f6e1f91c7bc1f5bc4bd9df1db51';
             const endSha = context.payload.inputs.end || process.env.GITHUB_SHA;
 
             core.exportVariable('ORG_USERNAME', process.env.SECRETS[process.env.USERNAME])
