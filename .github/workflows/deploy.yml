@@ -132,14 +132,16 @@ jobs:
         run: |
           node_modules/sfdx-cli/bin/run force:source:deploy -p ${{ needs.prepare.outputs.deploy-paths }} -u automation
   delete:
-    needs: prepare
+    needs: [prepare, deploy]
     runs-on: ubuntu-latest
-    if: needs.prepare.outputs.delete-paths != '""'
     steps:
       - name: Context
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
+          NEEDS_CONTEXT: ${{ toJson(needs) }}
+        run: |
+          echo "$GITHUB_CONTEXT"
+          echo "$NEEDS_CONTEXT"
       - name: Checkout to previous state
         uses: actions/checkout@v2
         with:
