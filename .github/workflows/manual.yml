@@ -28,6 +28,7 @@ jobs:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
           echo "$GITHUB_CONTEXT"
+          git rev-list --max-parents=0 HEAD
       # - name: Cache node modules
       #   id: cache-node-modules
       #   uses: actions/cache@v2
