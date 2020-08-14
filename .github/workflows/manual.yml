@@ -36,12 +36,13 @@ jobs:
           START_SHA: ${{ github.event.inputs.start }}
           END_SHA: ${{ github.event.inputs.end }}
         run: |
+          FIRST_COMMIT=$(git rev-list --max-parents=0 HEAD)
+          echo "$FIRST_COMMIT"
           echo ::set-env name=ORG_USERNAME::${{ secrets[env.USERNAME] }}
           echo ::set-env name=ORG_CONSUMER_KEY::${{ secrets[env.CONSUMER_KEY] }}
           if [ "$START_SHA" != "" ]; then
             echo ::set-env name=START_SHA::$START_SHA
           elif
-            FIRST_COMMIT=$(git rev-list --max-parents=0 HEAD)
             echo ::set-env name=START_SHA::$FIRST_COMMIT
           fi
           if [ "$END_SHA" != "" ]; then
