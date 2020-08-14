@@ -41,7 +41,8 @@ jobs:
           if [ "$START_SHA" != "" ]; then
             echo ::set-env name=START_SHA::$START_SHA
           elif
-            echo ::set-env name=START_SHA::$(git rev-list --max-parents=0 HEAD)
+            FIRST_COMMIT=$(git rev-list --max-parents=0 HEAD)
+            echo ::set-env name=START_SHA::$FIRST_COMMIT
           fi
           if [ "$END_SHA" != "" ]; then
             echo ::set-env name=END_SHA::$END_SHA
