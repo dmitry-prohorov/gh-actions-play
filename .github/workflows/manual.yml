@@ -14,146 +14,261 @@ on:
         description: SHA commit end of range commits to deploy.
 
 jobs:
-  deploy:
+  prepare:
     runs-on: ubuntu-latest
+    outputs:
+      delete-paths: ${{ steps.check.outputs.delete-paths }}
+      deploy-paths: ${{ steps.check.outputs.deploy-paths }}
     steps:
-      # - name: Convert inputs
-      #   id: secrets
-      #   env:
-      #     ORG_NAME: ${{ github.event.inputs.org }}
-      #   run: |
-      #     USERNAME="${ORG_NAME^^}_USERNAME"
-      #     CONSUMER_KEY="${ORG_NAME^^}_CONSUMER_KEY"
-      #     echo ::set-output name=username::$USERNAME
-      #     echo ::set-output name=consumer-key::$CONSUMER_KEY
-      # - name: Setup job environment
-      #   env:
-      #     USERNAME: ${{ steps.secrets.outputs.username }}
-      #     CONSUMER_KEY: ${{ steps.secrets.outputs.consumer-key }}
-      #     START_SHA: ${{ github.event.inputs.start }}
-      #     END_SHA: ${{ github.event.inputs.end }}
-      #   run: |
-      #     echo ::set-env name=ORG_USERNAME::${{ secrets[env.USERNAME] }}
-      #     echo ::set-env name=ORG_CONSUMER_KEY::${{ secrets[env.CONSUMER_KEY] }}
-      #     if [ "$START_SHA" != "" ]; then
-      #       echo ::set-env name=START_SHA::$START_SHA
-      #     fi
-      #     if [ "$END_SHA" != "" ]; then
-      #       echo ::set-env name=END_SHA::$END_SHA
-      #     elif
-      #       echo ::set-env name=END_SHA::$GITHUB_SHA
-      #     fi
-      - uses: actions/checkout@v2
-        with:
-          ref: ${{ env.GITHUB_REF }}
-      - uses: actions/setup-node@v2-beta
-        with:
-          node-version: "13.x"
-      - name: Context
+      - name: Convert inputs
+        id: secrets
         env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
+          ORG_NAME: ${{ github.event.inputs.org }}
         run: |
-          echo "$GITHUB_CONTEXT"
-          FIRST_COMMIT=$(git rev-list --max-parents=0 HEAD)
-          echo "$FIRST_COMMIT"
-      # - name: Cache node modules
-      #   id: cache-node-modules
-      #   uses: actions/cache@v2
-      #   env:
-      #     cache-name: cache-node-modules
-      #   with:
-      #     path: '**/node_modules'
-      #     key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-build-${{ env.cache-name }}-
-      #       ${{ runner.os }}-build-
-      #       ${{ runner.os }}-
-      # - name: Install Salesforce CLI
-      #   if: steps.cache-node-modules.outputs.cache-hit != 'true'
-      #   run: |
-      #     npm install sfdx-cli
-      #     node_modules/sfdx-cli/bin/run --version
-      #     node_modules/sfdx-cli/bin/run plugins --core
-      # - name: Convert inputs
-      #   id: secrets
-      #   env:
-      #     ORG_NAME: ${{ github.event.inputs.org }}
-      #   run: |
-      #     USERNAME="${ORG_NAME^^}_USERNAME"
-      #     CONSUMER_KEY="${ORG_NAME^^}_CONSUMER_KEY"
-      #     echo ::set-output name=username::$USERNAME
-      #     echo ::set-output name=consumer-key::$CONSUMER_KEY
-      # - name: Setup job environment
-      #   env:
-      #     USERNAME: ${{ steps.secrets.outputs.username }}
-      #     CONSUMER_KEY: ${{ steps.secrets.outputs.consumer-key }}
-      #     START_SHA: ${{ github.event.inputs.start }}
-      #     END_SHA: ${{ github.event.inputs.end }}
-      #   run: |
-      #     echo ::set-env name=ORG_USERNAME::${{ secrets[env.USERNAME] }}
-      #     echo ::set-env name=ORG_CONSUMER_KEY::${{ secrets[env.CONSUMER_KEY] }}
-      #     if [ "$START_SHA" != "" ]; then
-      #       echo ::set-env name=START_SHA::$START_SHA
-      #     fi
-      #     if [ "$END_SHA" != "" ]; then
-      #       echo ::set-env name=END_SHA::$END_SHA
-      #     elif
-      #       echo ::set-env name=END_SHA::$GITHUB_SHA
-      #     fi
-      # - name: Authenticate Org
-      #   env:
-      #     SALESFORCE_JWT_SECRET_KEY: ${{ secrets.UTILS_JWT_SECRET_KEY }}
-      #   run: |
-      #     echo "${SALESFORCE_JWT_SECRET_KEY}" > server.key
-      #     echo "${ORG_USERNAME}"
-      #     node_modules/sfdx-cli/bin/run force:auth:jwt:grant --clientid ${{ secrets.SF_UTILS_CONSUMER_KEY }} --jwtkeyfile server.key --username ${ORG_USERNAME} --setdefaultdevhubusername -a currentorg
-      # - name: Prepare libs
-      #   env:
-      #     MODULES_CACHED: ${{ steps.cache-node-modules.outputs.cache-hit }}
-      #   run: |
-      #     if [ "$MODULES_CACHED" == "true" ]; then
-      #       npm run --prefix ./libs build-all-quick-parallel
-      #     else
-      #       npm run postinstall
-      #       npm run --prefix ./libs build-all-long-parallel
-      #     fi
-      # - name: Project Metadata Prepare
-      #   uses: ./.github/actions/prepare-project-metadata
-      #   with:
-      #     prepare-app: 'true'
-      #     prepare-default-connector-settings: 'true'
-      #     app-certificate: ${{ secrets.SUMO_PACKAGE_CONNECTED_APP_CERTIFICATE }}
-      #     admin-token: ${{ secrets.JAVA_ADMIN_TOKEN }}
-      #     crypto-key: ${{ secrets.JAVA_CRYPTO_KEY }}
-      #     java-endpoint: ${{ secrets.JAVA_STAGING_ENDPOINT }}
-      #     consumer-key: ${{ env.ORG_CONSUMER_KEY }}
-      # - name: Get changed files
-      #   id: file_changes
-      #   if: github.event.inputs.start != ''
-      #   uses: trilom/file-changes-action@v1.2.4
-      #   with:
-      #     pushBefore: ${{ env.START_SHA }}
-      #     pushAfter: ${{ env.END_SHA }}
-      # - name: Convert git changes to SFDX deploy path
-      #   id: parse-git-changes
-      #   if: github.event.inputs.start != ''
-      #   uses: ./.github/actions/convert-git-changes-to-sfdx-deploy-path
-      #   with:
-      #     files: ${{ steps.file_changes.outputs.files }}
-      #     files-added: ${{ steps.file_changes.outputs.files_added }}
-      #     files-modified: ${{ steps.file_changes.outputs.files_modified }}
-      #     files-removed: ${{ steps.file_changes.outputs.files_removed }}
-      # - name: Deploy source to org
-      #   env:
-      #     PARTIAL_DEPLOY_PATH: ${{ steps.parse-git-changes.outputs.paths }}
-      #   run: |
-      #     mkdir force-app/main/default/connectedApps
-      #     cp config/connected-app/SUMOConnectedApp.connectedApp-meta.xml force-app/main/default/connectedApps
-      #     cp config/connected-app/DefaultConnectionSettings.Settings.md-meta.xml force-app/main/default/customMetadata
-      #     if [ "$PARTIAL_DEPLOY_PATH" != "" ]; then
-      #       deployPath=$PARTIAL_DEPLOY_PATH
-      #     else
-      #       deployPath="force-app/main/default"
-      #     fi
-      #     echo $deployPath
-      #     node_modules/sfdx-cli/bin/run force:source:deploy -p $deployPath -u qaorg
+          USERNAME="${ORG_NAME^^}_USERNAME"
+          CONSUMER_KEY="${ORG_NAME^^}_CONSUMER_KEY"
+          echo ::set-output name=username::$USERNAME
+          echo ::set-output name=consumer-key::$CONSUMER_KEY
+      - name: Setup job environment
+        env:
+          USERNAME: ${{ steps.secrets.outputs.username }}
+          CONSUMER_KEY: ${{ steps.secrets.outputs.consumer-key }}
+          START_SHA: ${{ github.event.inputs.start }}
+          END_SHA: ${{ github.event.inputs.end }}
+        run: |
+          echo ::set-env name=ORG_USERNAME::${{ secrets[env.USERNAME] }}
+          echo ::set-env name=ORG_CONSUMER_KEY::${{ secrets[env.CONSUMER_KEY] }}
+          if [ "$START_SHA" != "" ]; then
+            echo ::set-env name=START_SHA::$START_SHA
+          elif
+            echo ::set-env name=START_SHA::$(git rev-list --max-parents=0 HEAD)
+          fi
+          if [ "$END_SHA" != "" ]; then
+            echo ::set-env name=END_SHA::$END_SHA
+          elif
+            echo ::set-env name=END_SHA::$GITHUB_SHA
+          fi
+      - uses: actions/checkout@v2
+          with: ${{ env.END_SHA }}
+      - name: Get changed files
+        id: file_changes
+        uses: dmitry-prohorov/file-changes-action@master
+      - name: Check files
+        id: check
+        uses: actions/github-script@v2
+        env:
+          files: ${{ steps.file_changes.outputs.files }}
+          files_added: ${{ steps.file_changes.outputs.files_added }}
+          files_modified: ${{ steps.file_changes.outputs.files_modified }}
+          files_removed: ${{ steps.file_changes.outputs.files_removed }}
+          files_renamed: ${{ steps.file_changes.outputs.files_renamed }}
+          files_previous: ${{ steps.file_changes.outputs.files_previous }}
+        with:
+          script: |
+            console.log(context)
+            console.log('files', process.env.files);
+            console.log('files_added', process.env.files_added);
+            console.log('files_modified', process.env.files_modified);
+            console.log('files_removed', process.env.files_removed);
+            console.log('files_renamed', process.env.files_renamed);
+            console.log('files_previous', process.env.files_previous);
+            const path = require('path');
+            const added = JSON.parse(process.env.files_added);
+            const modified = JSON.parse(process.env.files_modified);
+            const renamed = JSON.parse(process.env.files_renamed);
+            const removed = JSON.parse(process.env.files_removed);
+            const previous = JSON.parse(process.env.files_previous);
+            console.log(Array.isArray(added));
+
+            function isLightningMetadataPath(file) {
+              return  file.includes('/aura/') || file.includes('/lwc/');
+            }
+            function isStaticresourceMetadataPath(file) {
+              return file.includes('/staticresources/');
+            }
+            function isSpecificMetadataPath(file) {
+              return isLightningMetadataPath(file) || isStaticresourceMetadataPath(file);
+            }
+
+            function getCommonMetadataPath(file) {
+              const filePathParts = path.dirname(file).split(path.sep);
+              const metadataFolderIndex = (filePathParts.includes('aura') && filePathParts.indexOf('aura'))
+                || (filePathParts.includes('lwc') && filePathParts.indexOf('lwc'))
+                || (filePathParts.includes('staticresources') && filePathParts.indexOf('staticresources'));
+              return filePathParts.slice(0, metadataFolderIndex + 2).join(path.sep);
+            }
+            function getStaticresourceMetadataPath(file) {
+              if (path.extname(file) === '.xml') {
+                return path.join(path.dirname(file), path.basename(file).split('.')[0])
+              }
+              return getCommonMetadataPath(file);
+            }
+            function getMetadataPath(file) {
+              return (isLightningMetadataPath(file) && getCommonMetadataPath(file))
+                || (isStaticresourceMetadataPath(file) && getStaticresourceMetadataPath(file))
+                || file;
+            }
+
+            let deployMetadata = new Set([...added, ...modified, ...renamed].map((file) => getMetadataPath(file)));
+
+            const deleteMetadata = new Set(previous.map((file) => getMetadataPath(file)));
+
+            removed.forEach((file) => {
+              if (isSpecificMetadataPath(file) && path.extname(file) !== '.xml') {
+                deployMetadata.add(getCommonMetadataPath(file));
+              } else {
+                deleteMetadata.add(getMetadataPath(file));
+              }
+            });
+
+            deployMetadata = new Set([...deployMetadata].filter((file) => !deleteMetadata.has(file)));
+
+            console.log(deployMetadata)
+            console.log(deleteMetadata)
+            core.setOutput('deploy-paths', `"${Array.from(deployMetadata).join(', \\\n')}"`)
+            core.setOutput('delete-paths', `"${Array.from(deleteMetadata).join(', \\\n')}"`)
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Convert inputs
+  #       id: secrets
+  #       env:
+  #         ORG_NAME: ${{ github.event.inputs.org }}
+  #       run: |
+  #         USERNAME="${ORG_NAME^^}_USERNAME"
+  #         CONSUMER_KEY="${ORG_NAME^^}_CONSUMER_KEY"
+  #         echo ::set-output name=username::$USERNAME
+  #         echo ::set-output name=consumer-key::$CONSUMER_KEY
+  #     - name: Setup job environment
+  #       env:
+  #         USERNAME: ${{ steps.secrets.outputs.username }}
+  #         CONSUMER_KEY: ${{ steps.secrets.outputs.consumer-key }}
+  #         START_SHA: ${{ github.event.inputs.start }}
+  #         END_SHA: ${{ github.event.inputs.end }}
+  #       run: |
+  #         echo ::set-env name=ORG_USERNAME::${{ secrets[env.USERNAME] }}
+  #         echo ::set-env name=ORG_CONSUMER_KEY::${{ secrets[env.CONSUMER_KEY] }}
+  #         if [ "$START_SHA" != "" ]; then
+  #           echo ::set-env name=START_SHA::$START_SHA
+  #         elif
+  #           echo ::set-env name=START_SHA::$(git rev-list --max-parents=0 HEAD)
+  #         fi
+  #         if [ "$END_SHA" != "" ]; then
+  #           echo ::set-env name=END_SHA::$END_SHA
+  #         elif
+  #           echo ::set-env name=END_SHA::$GITHUB_SHA
+  #         fi
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         ref: ${{ env.GITHUB_REF }}
+  #     - uses: actions/setup-node@v2-beta
+  #       with:
+  #         node-version: "13.x"
+  #     - name: Context
+  #       env:
+  #         GITHUB_CONTEXT: ${{ toJson(github) }}
+  #       run: |
+  #         echo "$GITHUB_CONTEXT"
+  #         FIRST_COMMIT=$(git rev-list --max-parents=0 HEAD)
+  #         echo "$FIRST_COMMIT"
+  #     # - name: Cache node modules
+  #     #   id: cache-node-modules
+  #     #   uses: actions/cache@v2
+  #     #   env:
+  #     #     cache-name: cache-node-modules
+  #     #   with:
+  #     #     path: '**/node_modules'
+  #     #     key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+  #     #     restore-keys: |
+  #     #       ${{ runner.os }}-build-${{ env.cache-name }}-
+  #     #       ${{ runner.os }}-build-
+  #     #       ${{ runner.os }}-
+  #     # - name: Install Salesforce CLI
+  #     #   if: steps.cache-node-modules.outputs.cache-hit != 'true'
+  #     #   run: |
+  #     #     npm install sfdx-cli
+  #     #     node_modules/sfdx-cli/bin/run --version
+  #     #     node_modules/sfdx-cli/bin/run plugins --core
+  #     # - name: Convert inputs
+  #     #   id: secrets
+  #     #   env:
+  #     #     ORG_NAME: ${{ github.event.inputs.org }}
+  #     #   run: |
+  #     #     USERNAME="${ORG_NAME^^}_USERNAME"
+  #     #     CONSUMER_KEY="${ORG_NAME^^}_CONSUMER_KEY"
+  #     #     echo ::set-output name=username::$USERNAME
+  #     #     echo ::set-output name=consumer-key::$CONSUMER_KEY
+  #     # - name: Setup job environment
+  #     #   env:
+  #     #     USERNAME: ${{ steps.secrets.outputs.username }}
+  #     #     CONSUMER_KEY: ${{ steps.secrets.outputs.consumer-key }}
+  #     #     START_SHA: ${{ github.event.inputs.start }}
+  #     #     END_SHA: ${{ github.event.inputs.end }}
+  #     #   run: |
+  #     #     echo ::set-env name=ORG_USERNAME::${{ secrets[env.USERNAME] }}
+  #     #     echo ::set-env name=ORG_CONSUMER_KEY::${{ secrets[env.CONSUMER_KEY] }}
+  #     #     if [ "$START_SHA" != "" ]; then
+  #     #       echo ::set-env name=START_SHA::$START_SHA
+  #     #     fi
+  #     #     if [ "$END_SHA" != "" ]; then
+  #     #       echo ::set-env name=END_SHA::$END_SHA
+  #     #     elif
+  #     #       echo ::set-env name=END_SHA::$GITHUB_SHA
+  #     #     fi
+  #     # - name: Authenticate Org
+  #     #   env:
+  #     #     SALESFORCE_JWT_SECRET_KEY: ${{ secrets.UTILS_JWT_SECRET_KEY }}
+  #     #   run: |
+  #     #     echo "${SALESFORCE_JWT_SECRET_KEY}" > server.key
+  #     #     echo "${ORG_USERNAME}"
+  #     #     node_modules/sfdx-cli/bin/run force:auth:jwt:grant --clientid ${{ secrets.SF_UTILS_CONSUMER_KEY }} --jwtkeyfile server.key --username ${ORG_USERNAME} --setdefaultdevhubusername -a currentorg
+  #     # - name: Prepare libs
+  #     #   env:
+  #     #     MODULES_CACHED: ${{ steps.cache-node-modules.outputs.cache-hit }}
+  #     #   run: |
+  #     #     if [ "$MODULES_CACHED" == "true" ]; then
+  #     #       npm run --prefix ./libs build-all-quick-parallel
+  #     #     else
+  #     #       npm run postinstall
+  #     #       npm run --prefix ./libs build-all-long-parallel
+  #     #     fi
+  #     # - name: Project Metadata Prepare
+  #     #   uses: ./.github/actions/prepare-project-metadata
+  #     #   with:
+  #     #     prepare-app: 'true'
+  #     #     prepare-default-connector-settings: 'true'
+  #     #     app-certificate: ${{ secrets.SUMO_PACKAGE_CONNECTED_APP_CERTIFICATE }}
+  #     #     admin-token: ${{ secrets.JAVA_ADMIN_TOKEN }}
+  #     #     crypto-key: ${{ secrets.JAVA_CRYPTO_KEY }}
+  #     #     java-endpoint: ${{ secrets.JAVA_STAGING_ENDPOINT }}
+  #     #     consumer-key: ${{ env.ORG_CONSUMER_KEY }}
+  #     # - name: Get changed files
+  #     #   id: file_changes
+  #     #   if: github.event.inputs.start != ''
+  #     #   uses: trilom/file-changes-action@v1.2.4
+  #     #   with:
+  #     #     pushBefore: ${{ env.START_SHA }}
+  #     #     pushAfter: ${{ env.END_SHA }}
+  #     # - name: Convert git changes to SFDX deploy path
+  #     #   id: parse-git-changes
+  #     #   if: github.event.inputs.start != ''
+  #     #   uses: ./.github/actions/convert-git-changes-to-sfdx-deploy-path
+  #     #   with:
+  #     #     files: ${{ steps.file_changes.outputs.files }}
+  #     #     files-added: ${{ steps.file_changes.outputs.files_added }}
+  #     #     files-modified: ${{ steps.file_changes.outputs.files_modified }}
+  #     #     files-removed: ${{ steps.file_changes.outputs.files_removed }}
+  #     # - name: Deploy source to org
+  #     #   env:
+  #     #     PARTIAL_DEPLOY_PATH: ${{ steps.parse-git-changes.outputs.paths }}
+  #     #   run: |
+  #     #     mkdir force-app/main/default/connectedApps
+  #     #     cp config/connected-app/SUMOConnectedApp.connectedApp-meta.xml force-app/main/default/connectedApps
+  #     #     cp config/connected-app/DefaultConnectionSettings.Settings.md-meta.xml force-app/main/default/customMetadata
+  #     #     if [ "$PARTIAL_DEPLOY_PATH" != "" ]; then
+  #     #       deployPath=$PARTIAL_DEPLOY_PATH
+  #     #     else
+  #     #       deployPath="force-app/main/default"
+  #     #     fi
+  #     #     echo $deployPath
+  #     #     node_modules/sfdx-cli/bin/run force:source:deploy -p $deployPath -u qaorg
