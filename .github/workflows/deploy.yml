@@ -136,6 +136,13 @@ jobs:
     runs-on: ubuntu-latest
     if: needs.prepare.outputs.delete-paths != '""'
     steps:
+      - name: Context
+        env:
+          BEFORE: ${{ github.payload.before }}
+          AFTER: ${{ github.payload.after }}
+        run: |
+          echo "${env.BEFORE}"
+          echo "${env.AFTER}"
       - name: Checkout to previous state
         uses: actions/checkout@v2
         with:
