@@ -39,7 +39,7 @@ jobs:
           CONSUMER_KEY: ${{ steps.secrets.outputs.consumer-key }}
           SECRETS: ${{ toJson(secrets) }}
           FIRST_COMMIT: ${{ steps.secrets.outputs.sha }}
-          GITHUB_SHA: ${{ env.GITHUB_SHA }}
+          GITHUB_SHA: ${{ github.sha }}
         with:
           script: |
             const startSha = context.payload.inputs.start || process.env.FIRST_COMMIT;
