@@ -1,48 +1,25 @@
-# This is a basic workflow to help you get started with Actions
-
 name: DevelopCI
 
-# Controls when the action will run. Triggers the workflow on push
-# events but only for the develop branch
 on:
   push:
     branches: "master"
     paths:
       - "force-app/**"
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "deploy"
-  deploy:
-    # The type of runner that the job will run on
+  prepare:
     runs-on: ubuntu-latest
     outputs:
       delete-paths: ${{ steps.check.outputs.delete-paths }}
-    # Steps represent a sequence of tasks that will be executed as part of the job
+      deploy-paths: ${{ steps.check.outputs.deploy-paths }}
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
-        with:
-          node-version: "13.x"
-
-      - name: Cache node modules
-        id: cache-node-modules
-        uses: actions/cache@v2
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: "**/node_modules"
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
-
+      # - uses: actions/setup-node@v2-beta
+      #   with:
+      #     node-version: "13.x"
       - name: Get changed files
         id: file_changes
         uses: dmitry-prohorov/file-changes-action@master
-
       - name: Check files
         id: check
         uses: actions/github-script@v2
@@ -118,28 +95,46 @@ jobs:
             core.setOutput('deploy-paths', `"${Array.from(deployMetadata).join(', \\\n')}"`)
             core.setOutput('delete-paths', `"${Array.from(deleteMetadata).join(', \\\n')}"`)
 
+  deploy:
+    needs: prepare
+    if: needs.prepare.outputs.deploy-paths != '""'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: "13.x"
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
       - name: Install Salesforce CLI
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: |
           npm install sfdx-cli
           node_modules/sfdx-cli/bin/run --version
           node_modules/sfdx-cli/bin/run plugins --core
-
       - name: Authenticate test automation org
         run: |
           echo "${SALESFORCE_JWT_SECRET_KEY}" > server.key
           node_modules/sfdx-cli/bin/run force:auth:jwt:grant --clientid ${{ secrets.SF_UTILS_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.AUTOMATION_ORG_USERNAME}} --setdefaultdevhubusername -a automation
         env:
           SALESFORCE_JWT_SECRET_KEY: ${{ secrets.UTILS_JWT_SECRET_KEY }}
-
       - name: Deploy
-        if: steps.check.outputs.deploy-paths != '""'
         run: |
-          node_modules/sfdx-cli/bin/run force:source:deploy -p ${{ steps.check.outputs.deploy-paths }} -u automation
+          node_modules/sfdx-cli/bin/run force:source:deploy -p ${{ needs.prepare.outputs.deploy-paths }} -u automation
   delete:
-    needs: deploy
+    needs: [prepare, deploy]
     runs-on: ubuntu-latest
-    if: needs.deploy.outputs.delete-paths != '""'
+    if: needs.prepare.outputs.delete-paths != '""'
     steps:
       - name: Checkout to previous state
         uses: actions/checkout@v2
@@ -148,7 +143,9 @@ jobs:
       - uses: actions/setup-node@v2-beta
         with:
           node-version: "13.x"
-
+      - name: Check file system
+        run: |
+          ls -lat "/home/runner/work/gh-actions-play/gh-actions-play/force-app/main/default/classes"
       - name: Cache node modules
         id: cache-node-modules
         uses: actions/cache@v2
@@ -178,4 +175,4 @@ jobs:
 
       - name: Delete
         run: |
-          node_modules/sfdx-cli/bin/run force:source:delete -p ${{ needs.deploy.outputs.delete-paths }} -u automation -r
+          node_modules/sfdx-cli/bin/run force:source:delete -p ${{ needs.prepare.outputs.delete-paths }} -u automation -r
