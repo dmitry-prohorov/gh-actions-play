@@ -35,11 +35,12 @@ jobs:
         env:
           USERNAME: ${{ steps.secrets.outputs.username }}
           CONSUMER_KEY: ${{ steps.secrets.outputs.consumer-key }}
+          SECRETS: ${{ toJson(secrets) }}
         with:
           script: |
             const startSha = context.payload.inputs.start;
             const endSha = context.payload.inputs.end;
-            console.log(secrets)
+            console.log(process.env.SECRETS)
         # run: |
         #   FIRST_COMMIT=$(git rev-list --max-parents=0 HEAD)
         #   echo "$FIRST_COMMIT"
