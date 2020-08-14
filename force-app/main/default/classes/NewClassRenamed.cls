@@ -1,5 +1,5 @@
 public with sharing class NewClassRenamed {
-  // update 123
+  // update
   public NewClassRenamed() {
   }
 }
