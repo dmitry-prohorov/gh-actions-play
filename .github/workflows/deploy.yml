@@ -134,6 +134,7 @@ jobs:
   delete:
     needs: [prepare, deploy]
     runs-on: ubuntu-latest
+    if: needs.prepare.outputs.delete-paths != '""'
     steps:
       - name: Context
         env:
