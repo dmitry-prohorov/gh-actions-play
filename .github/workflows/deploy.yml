@@ -138,11 +138,11 @@ jobs:
     steps:
       - name: Context
         env:
-          BEFORE: ${{ github.payload.before }}
-          AFTER: ${{ github.payload.after }}
+          SHA_BEFORE: ${{ github.payload.before }}
+          SHA_AFTER: ${{ github.payload.after }}
         run: |
-          echo "${env.BEFORE}"
-          echo "${env.AFTER}"
+          echo "${env.SHA_BEFORE}"
+          echo "${env.SHA_AFTER}"
       - name: Checkout to previous state
         uses: actions/checkout@v2
         with:
