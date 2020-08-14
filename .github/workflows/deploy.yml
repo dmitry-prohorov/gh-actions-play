@@ -43,6 +43,7 @@ jobs:
         uses: dmitry-prohorov/file-changes-action@master
 
       - name: Check files
+        id: check
         uses: actions/github-script@v2
         env:
           files: ${{ steps.file_changes.outputs.files }}
@@ -109,8 +110,11 @@ jobs:
             });
 
             deployMetadata = new Set([...deployMetadata].filter((file) => !deleteMetadata.has(file)));
-            console.log(deployMetadata);
-            console.log(deleteMetadata);
+
+            console.log(deployMetadata)
+            console.log(deleteMetadata)
+            core.setOutput('deploy-paths', `"${Array.from(deployMetadata).join(', \\\n')}"`)
+            core.setOutput('delete-paths', `"${Array.from(deleteMetadata).join(', \\\n')}"`)
 
       - name: Install Salesforce CLI
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
@@ -127,11 +131,11 @@ jobs:
           SALESFORCE_JWT_SECRET_KEY: ${{ secrets.UTILS_JWT_SECRET_KEY }}
 
       - name: Deploy
-        if: steps.parse-git-changes.outputs.deploy-paths != ''
+        if: steps.check.outputs.deploy-paths != ''
         run: |
           node_modules/sfdx-cli/bin/run force:source:deploy -p ${{ steps.parse-git-changes.outputs.deploy-paths }} -u automation
 
       - name: Delete
-        if: steps.parse-git-changes.outputs.delete-paths != ''
+        if: steps.check.outputs.delete-paths != ''
         run: |
           node_modules/sfdx-cli/bin/run force:source:delete -p ${{ steps.parse-git-changes.outputs.delete-paths }} -u automation -r
