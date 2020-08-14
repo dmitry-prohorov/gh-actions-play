@@ -97,9 +97,9 @@ jobs:
 
   deploy:
     needs: prepare
-    if: needs.prepare.outputs.deploy-paths != '""'
     runs-on: ubuntu-latest
     steps:
+      if: needs.prepare.outputs.deploy-paths != '""'
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2-beta
         with:
@@ -134,8 +134,8 @@ jobs:
   delete:
     needs: [prepare, deploy]
     runs-on: ubuntu-latest
-    if: needs.prepare.outputs.delete-paths != '""'
     steps:
+      if: needs.prepare.outputs.delete-paths != '""'
       - name: Context
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
