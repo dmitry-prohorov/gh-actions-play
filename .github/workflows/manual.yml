@@ -30,9 +30,6 @@ jobs:
             const endSha = context.payload.inputs.end || context.sha;
             const secrets = JSON.parse(process.env.SECRETS)
 
-            console.log(secrets)
-            console.log(secrets["ORIGIN_JWT_SECRET_KEY"])
-
             core.exportVariable('ORG_USERNAME', secrets[`${context.payload.inputs.org.toUpperCase()}_USERNAME`])
             core.exportVariable('ORG_CONSUMER_KEY', secrets[`${context.payload.inputs.org.toUpperCase()}_CONSUMER_KEY`])
             core.exportVariable('START_SHA', startSha)

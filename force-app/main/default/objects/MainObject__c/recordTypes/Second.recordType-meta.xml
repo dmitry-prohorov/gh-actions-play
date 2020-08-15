@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<RecordType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Second</fullName>
+    <active>true</active>
+    <label>Second</label>
+    <picklistValues>
+        <picklist>Options__c</picklist>
+        <values>
+            <fullName>FIRST</fullName>
+            <default>true</default>
+        </values>
+        <values>
+            <fullName>SECOND</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>THIRD</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>FOURTH</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+</RecordType>
