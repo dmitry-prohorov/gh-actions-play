@@ -6,9 +6,6 @@ on:
       version:
         required: true
         description: Version number to specify for creating package
-      ref:
-        required: true
-        description: Specify branch or sha from which package should be created
 
 jobs:
   # prepare:
@@ -190,3 +187,6 @@ jobs:
             })
             console.log(releases)
             console.log(tags)
+            const latestTagName = (releases.data[0] || {}).tag_name
+            const latestRelease = tags.data.find(tag => !latestTagName || tag.name === latestTagName)
+            console.log(latestRelease)
