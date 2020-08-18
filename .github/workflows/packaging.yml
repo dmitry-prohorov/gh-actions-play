@@ -15,7 +15,7 @@ jobs:
         id: prepare
         uses: actions/github-script@v2
         with:
-          run: |
+          script: |
             core.setOutput('package-name', `Dpro Play Package (v${context.payload.inputs.version})`)
       - uses: actions/setup-node@v2-beta
         with:
