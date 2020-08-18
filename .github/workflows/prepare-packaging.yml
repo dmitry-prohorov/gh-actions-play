@@ -43,7 +43,7 @@ jobs:
           files_previous: ${{ steps.file_changes.outputs.files_previous }}
         with:
           script: |
-            console.log(context)
+            console.log(context);
             console.log('files', process.env.files);
             console.log('files_added', process.env.files_added);
             console.log('files_modified', process.env.files_modified);
@@ -59,7 +59,7 @@ jobs:
             console.log(Array.isArray(added));
 
             function isSource(file) {
-              return file.includes('force-app/main/default')
+              return file.includes('force-app/main/default');
             }
 
             function isLightningMetadataPath(file) {
@@ -105,10 +105,10 @@ jobs:
 
             deployMetadata = new Set([...deployMetadata].filter((file) => !deleteMetadata.has(file)));
 
-            console.log(deployMetadata.filter(file => isSource(file)))
-            console.log(deleteMetadata.filter(file => isSource(file)))
-            core.setOutput('deploy-paths', `"${Array.from(deployMetadata.filter(file => isSource(file)).join(', \\\n')}"`)
-            core.setOutput('delete-paths', `"${Array.from(deleteMetadata.filter(file => isSource(file)).join(', \\\n')}"`)
+            console.log(Array.from(deployMetadata).filter(file => isSource(file)))
+            console.log(Array.from(deployMetadata).filter(file => isSource(file)))
+            core.setOutput('deploy-paths', `"${Array.from(deployMetadata).filter(file => isSource(file)).join(', \\\n')}"`)
+            core.setOutput('delete-paths', `"${Array.from(deleteMetadata).filter(file => isSource(file)).join(', \\\n')}"`)
 
   deploy:
     needs: prepare
