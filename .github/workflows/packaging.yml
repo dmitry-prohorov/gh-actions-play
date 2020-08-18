@@ -16,7 +16,7 @@ jobs:
         uses: actions/github-script@v2
         with:
           script: |
-            core.setOutput('package-name', `Dpro Play Package (v${context.payload.inputs.version})`)
+            core.setOutput('package-name', `"Dpro Play Package (v${context.payload.inputs.version})"`)
       - uses: actions/setup-node@v2-beta
         with:
           node-version: "13.x"
@@ -47,7 +47,7 @@ jobs:
       - name: Create package
         id: package
         run: |
-          package=$(node_modules/sfdx-cli/bin/run orce:package1:version:create -m -w -1 -n ${{ steps.prepare.outputs.package-name }} -v ${{ github.event.inputs.version }} -u automation -i {{ secrets.PACKAGE_ID }} --json)
+          package=`node_modules/sfdx-cli/bin/run orce:package1:version:create -m -w -1 -n ${{ steps.prepare.outputs.package-name }} -v ${{ github.event.inputs.version }} -u automation -i {{ secrets.PACKAGE_ID }} --json`
           echo ::set-output name=result::$package
       - name: Output
         uses: actions/github-script@v2
