@@ -54,5 +54,5 @@ jobs:
         env:
           PACKAGE_RESULTS: ${{ steps.package.outputs.result }}
         with:
-          run: |
+          script: |
             console.log(process.env.PACKAGE_RESULTS)
