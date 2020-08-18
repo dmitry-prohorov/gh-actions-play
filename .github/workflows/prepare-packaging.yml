@@ -106,7 +106,7 @@ jobs:
             deployMetadata = new Set([...deployMetadata].filter((file) => !deleteMetadata.has(file)));
 
             console.log(deployMetadata.filter(file => isSource(file)))
-            console.log(deleteMetadata.filter(file => isSource(file))
+            console.log(deleteMetadata.filter(file => isSource(file)))
             core.setOutput('deploy-paths', `"${Array.from(deployMetadata.filter(file => isSource(file)).join(', \\\n')}"`)
             core.setOutput('delete-paths', `"${Array.from(deleteMetadata.filter(file => isSource(file)).join(', \\\n')}"`)
 
