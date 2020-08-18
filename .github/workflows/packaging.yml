@@ -174,7 +174,9 @@ jobs:
     # needs: [deploy, delete]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/github-script@v2
+      - name: Get latest release SHA
+        id: release
+        uses: actions/github-script@v2
         with:
           script: |
             const releases = await github.repos.listReleases({
@@ -185,8 +187,6 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo
             })
-            console.log(releases)
-            console.log(tags)
-            const latestTagName = (releases.data[0] || {}).tag_name
+            const latestTagName = (releases.data[0] || {}).tuk
             const latestRelease = tags.data.find(tag => !latestTagName || tag.name === latestTagName)
-            console.log(latestRelease)
+            core.setOutput('sha', latestRelease.commit.sha)
