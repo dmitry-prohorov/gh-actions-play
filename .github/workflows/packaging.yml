@@ -49,10 +49,24 @@ jobs:
         id: package
         run: |
           echo ::set-output name=result::$(node_modules/sfdx-cli/bin/run force:package1:version:create -m -w 60 -n ${{ steps.prepare.outputs.package-name }} -v ${{ github.event.inputs.version }} -u automation -i ${{ secrets.PACKAGE_ID }} --json)
-      - name: Output
+      - name: Create tag
         uses: actions/github-script@v2
         env:
           PACKAGE_RESULTS: ${{ steps.package.outputs.result }}
+          PACKAGE_NAME: ${{ steps.prepare.outputs.package-name }}
         with:
           script: |
             console.log(process.env.PACKAGE_RESULTS)
+            const packageResult = JSON.parse(process.env.PACKAGE_RESULTS)
+            if (packageResult.status !== 0) {
+              throw new Error(`${packageResult.name}: ${packageResult.message}`)
+            }
+
+            await github.git.createTag({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag: `v${context.payload.inputs.version}`,
+              message: process.env.PACKAGE_NAME,
+              object: context.sha,
+              type: 'commit',
+            });
