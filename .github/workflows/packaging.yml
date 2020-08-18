@@ -189,4 +189,5 @@ jobs:
             })
             const latestTagName = (releases.data[0] || {}).tuk
             const latestRelease = tags.data.find(tag => !latestTagName || tag.name === latestTagName)
+            console.log(latestRelease)
             core.setOutput('sha', latestRelease.commit.sha)
