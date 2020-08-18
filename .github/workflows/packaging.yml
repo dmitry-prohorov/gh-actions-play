@@ -75,6 +75,6 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: `refs/tags/v${context.payload.inputs.version}`,
-              sha: tag.sha
+              sha: tag.data.sha
             })
             console.log(ref)
