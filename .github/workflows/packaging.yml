@@ -55,6 +55,7 @@ jobs:
           PACKAGE_RESULTS: ${{ steps.package.outputs.result }}
           PACKAGE_NAME: ${{ steps.prepare.outputs.package-name }}
         with:
+          github-token: ${{ secrets.DPRO_TOKEN }}
           script: |
             console.log(process.env.PACKAGE_RESULTS)
             const packageResult = JSON.parse(process.env.PACKAGE_RESULTS)
