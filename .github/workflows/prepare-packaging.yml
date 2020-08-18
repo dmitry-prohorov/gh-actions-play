@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       delete-paths: ${{ steps.check.outputs.delete-paths }}
+      sha: ${{ steps.release.outputs.sha }}
     steps:
       - name: Get latest release SHA
         id: release
@@ -154,7 +155,7 @@ jobs:
       - name: Checkout to previous state
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.before }}
+          ref: ${{ needs.prepare.outputs.sha }}
       - uses: actions/setup-node@v2-beta
         with:
           node-version: "13.x"
