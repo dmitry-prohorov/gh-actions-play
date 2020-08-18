@@ -5,12 +5,12 @@ private with sharing class TriggerTests {
 
   @isTest
   static void test1() {
-    insert MainObject__c();
+    insert new MainObject__c();
     system.assert(true);
   }
   @isTest
   static void test2() {
-    insert Category__c();
+    insert new Category__c();
     system.assert(true);
   }
 }
