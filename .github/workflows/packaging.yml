@@ -53,7 +53,6 @@ jobs:
         uses: actions/github-script@v2
         env:
           PACKAGE_RESULTS: ${{ steps.package.outputs.result }}
-          PACKAGE_NAME: ${{ steps.prepare.outputs.package-name }}
         with:
           github-token: ${{ secrets.DPRO_TOKEN }}
           script: |
@@ -67,7 +66,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               tag: `v${context.payload.inputs.version}`,
-              message: process.env.PACKAGE_NAME,
+              message: `v${context.payload.inputs.version}`,
               object: context.sha,
               type: 'commit',
             });
