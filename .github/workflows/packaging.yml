@@ -70,5 +70,11 @@ jobs:
               object: context.sha,
               type: 'commit',
             });
-
             console.log(tag)
+            const ref = await github.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/tags/v${context.payload.inputs.version}`,
+              sha: tag.sha
+            })
+            console.log(ref)
