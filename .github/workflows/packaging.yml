@@ -8,265 +8,51 @@ on:
         description: Version number to specify for creating package
 
 jobs:
-  # prepare:
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     delete-paths: ${{ steps.check.outputs.delete-paths }}
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - name: Get changed files
-  #       id: file_changes
-  #       uses: dmitry-prohorov/file-changes-action@master
-  #     - name: Check files
-  #       id: check
-  #       uses: actions/github-script@v2
-  #       env:
-  #         files: ${{ steps.file_changes.outputs.files }}
-  #         files_added: ${{ steps.file_changes.outputs.files_added }}
-  #         files_modified: ${{ steps.file_changes.outputs.files_modified }}
-  #         files_removed: ${{ steps.file_changes.outputs.files_removed }}
-  #         files_renamed: ${{ steps.file_changes.outputs.files_renamed }}
-  #         files_previous: ${{ steps.file_changes.outputs.files_previous }}
-  #       with:
-  #         script: |
-  #           console.log(context)
-  #           console.log('files', process.env.files);
-  #           console.log('files_added', process.env.files_added);
-  #           console.log('files_modified', process.env.files_modified);
-  #           console.log('files_removed', process.env.files_removed);
-  #           console.log('files_renamed', process.env.files_renamed);
-  #           console.log('files_previous', process.env.files_previous);
-  #           const path = require('path');
-  #           const added = JSON.parse(process.env.files_added);
-  #           const modified = JSON.parse(process.env.files_modified);
-  #           const renamed = JSON.parse(process.env.files_renamed);
-  #           const removed = JSON.parse(process.env.files_removed);
-  #           const previous = JSON.parse(process.env.files_previous);
-  #           console.log(Array.isArray(added));
-
-  #           function isLightningMetadataPath(file) {
-  #             return  file.includes('/aura/') || file.includes('/lwc/');
-  #           }
-  #           function isStaticresourceMetadataPath(file) {
-  #             return file.includes('/staticresources/');
-  #           }
-  #           function isSpecificMetadataPath(file) {
-  #             return isLightningMetadataPath(file) || isStaticresourceMetadataPath(file);
-  #           }
-
-  #           function getCommonMetadataPath(file) {
-  #             const filePathParts = path.dirname(file).split(path.sep);
-  #             const metadataFolderIndex = (filePathParts.includes('aura') && filePathParts.indexOf('aura'))
-  #               || (filePathParts.includes('lwc') && filePathParts.indexOf('lwc'))
-  #               || (filePathParts.includes('staticresources') && filePathParts.indexOf('staticresources'));
-  #             return filePathParts.slice(0, metadataFolderIndex + 2).join(path.sep);
-  #           }
-  #           function getStaticresourceMetadataPath(file) {
-  #             if (path.extname(file) === '.xml') {
-  #               return path.join(path.dirname(file), path.basename(file).split('.')[0])
-  #             }
-  #             return getCommonMetadataPath(file);
-  #           }
-  #           function getMetadataPath(file) {
-  #             return (isLightningMetadataPath(file) && getCommonMetadataPath(file))
-  #               || (isStaticresourceMetadataPath(file) && getStaticresourceMetadataPath(file))
-  #               || file;
-  #           }
-
-  #           let deployMetadata = new Set([...added, ...modified, ...renamed].map((file) => getMetadataPath(file)));
-
-  #           const deleteMetadata = new Set(previous.map((file) => getMetadataPath(file)));
-
-  #           removed.forEach((file) => {
-  #             if (isSpecificMetadataPath(file) && path.extname(file) !== '.xml') {
-  #               deployMetadata.add(getCommonMetadataPath(file));
-  #             } else {
-  #               deleteMetadata.add(getMetadataPath(file));
-  #             }
-  #           });
-
-  #           deployMetadata = new Set([...deployMetadata].filter((file) => !deleteMetadata.has(file)));
-
-  #           console.log(deployMetadata)
-  #           console.log(deleteMetadata)
-  #           core.setOutput('deploy-paths', `"${Array.from(deployMetadata).join(', \\\n')}"`)
-  #           core.setOutput('delete-paths', `"${Array.from(deleteMetadata).join(', \\\n')}"`)
-  # deploy:
-  #   needs: prepare
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - uses: actions/setup-node@v2-beta
-  #       with:
-  #         node-version: "13.x"
-  #     - name: Cache node modules
-  #       id: cache-node-modules
-  #       uses: actions/cache@v2
-  #       env:
-  #         cache-name: cache-node-modules
-  #       with:
-  #         path: "**/node_modules"
-  #         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-  #         restore-keys: |
-  #           ${{ runner.os }}-build-${{ env.cache-name }}-
-  #           ${{ runner.os }}-build-
-  #           ${{ runner.os }}-
-  #     - name: Install Salesforce CLI
-  #       if: steps.cache-node-modules.outputs.cache-hit != 'true'
-  #       run: |
-  #         npm install sfdx-cli
-  #         node_modules/sfdx-cli/bin/run --version
-  #         node_modules/sfdx-cli/bin/run plugins --core
-  #     - name: Authenticate packaging org
-  #       run: |
-  #         echo "${SALESFORCE_JWT_SECRET_KEY}" > server.key
-  #         node_modules/sfdx-cli/bin/run force:auth:jwt:grant --clientid ${{ secrets.SF_UTILS_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.AUTOMATION_ORG_USERNAME}} --setdefaultdevhubusername -a automation
-  #       env:
-  #         SALESFORCE_JWT_SECRET_KEY: ${{ secrets.UTILS_JWT_SECRET_KEY }}
-  #     - name: Deploy
-  #       run: |
-  #         node_modules/sfdx-cli/bin/run force:source:convert -p force-app/main/default -d src -n 'Dpro Play Package'
-  #         node_modules/sfdx-cli/bin/run force:mdapi:deploy -w -1 -d src -u automation
-  # delete:
-  #   needs: [prepare, deploy]
-  #   runs-on: ubuntu-latest
-  #   if: needs.prepare.outputs.delete-paths != '""'
-  #   steps:
-  #     - name: Checkout to previous state
-  #       uses: actions/checkout@v2
-  #       with:
-  #         ref: ${{ github.event.before }}
-  #     - uses: actions/setup-node@v2-beta
-  #       with:
-  #         node-version: "13.x"
-  #     - name: Cache node modules
-  #       id: cache-node-modules
-  #       uses: actions/cache@v2
-  #       env:
-  #         cache-name: cache-node-modules
-  #       with:
-  #         path: "**/node_modules"
-  #         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-  #         restore-keys: |
-  #           ${{ runner.os }}-build-${{ env.cache-name }}-
-  #           ${{ runner.os }}-build-
-  #           ${{ runner.os }}-
-
-  #     - name: Install Salesforce CLI
-  #       if: steps.cache-node-modules.outputs.cache-hit != 'true'
-  #       run: |
-  #         npm install sfdx-cli
-  #         node_modules/sfdx-cli/bin/run --version
-  #         node_modules/sfdx-cli/bin/run plugins --core
-
-  #     - name: Authenticate test automation org
-  #       run: |
-  #         echo "${SALESFORCE_JWT_SECRET_KEY}" > server.key
-  #         node_modules/sfdx-cli/bin/run force:auth:jwt:grant --clientid ${{ secrets.SF_UTILS_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.AUTOMATION_ORG_USERNAME}} --setdefaultdevhubusername -a automation
-  #       env:
-  #         SALESFORCE_JWT_SECRET_KEY: ${{ secrets.UTILS_JWT_SECRET_KEY }}
-
-  #     - name: Delete
-  #       run: |
-  #         node_modules/sfdx-cli/bin/run force:source:delete -p ${{ needs.prepare.outputs.delete-paths }} -u automation -r
-
-  packaging:
-    # needs: [deploy, delete]
+  create-package:
     runs-on: ubuntu-latest
     steps:
-      - name: Get latest release SHA
-        id: release
+      - name: Prepare job env
+        id: prepare
         uses: actions/github-script@v2
         with:
-          script: |
-            const releases = await github.repos.listReleases({
-              owner: context.repo.owner,
-              repo: context.repo.repo
-            })
-            const tags = await github.repos.listTags({
-              owner: context.repo.owner,
-              repo: context.repo.repo
-            })
-            const latestTagName = (releases.data[0] || {}).tag_name
-            const latestRelease = tags.data.find(tag => !latestTagName || tag.name === latestTagName)
-            core.setOutput('sha', latestRelease.commit.sha)
-      - name: Get changed files
-        id: file_changes
-        uses: dmitry-prohorov/file-changes-action@master
+          run: |
+            core.setOutput('package-name', `Dpro Play Package (v${context.payload.inputs.version})`)
+      - uses: actions/setup-node@v2-beta
         with:
-          pushBefore: ${{ steps.release.outputs.sha }}
-          pushAfter: ${{ github.sha }}
-      - name: Check files
-        id: check
+          node-version: "13.x"
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+      - name: Install Salesforce CLI
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: |
+          npm install sfdx-cli
+          node_modules/sfdx-cli/bin/run --version
+          node_modules/sfdx-cli/bin/run plugins --core
+      - name: Authenticate packaging org
+        run: |
+          echo "${SALESFORCE_JWT_SECRET_KEY}" > server.key
+          node_modules/sfdx-cli/bin/run force:auth:jwt:grant --clientid ${{ secrets.SF_UTILS_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.AUTOMATION_ORG_USERNAME}} --setdefaultdevhubusername -a automation
+        env:
+          SALESFORCE_JWT_SECRET_KEY: ${{ secrets.UTILS_JWT_SECRET_KEY }}
+      - name: Create package
+        id: package
+        run: |
+          package=$(node_modules/sfdx-cli/bin/run orce:package1:version:create -m -w -1 -n ${{ steps.prepare.outputs.package-name }} -v ${{ github.event.inputs.version }} -u automation -i {{ secrets.PACKAGE_ID }} --json)
+          echo ::set-output name=result::$package
+      - name: Output
         uses: actions/github-script@v2
         env:
-          files: ${{ steps.file_changes.outputs.files }}
-          files_added: ${{ steps.file_changes.outputs.files_added }}
-          files_modified: ${{ steps.file_changes.outputs.files_modified }}
-          files_removed: ${{ steps.file_changes.outputs.files_removed }}
-          files_renamed: ${{ steps.file_changes.outputs.files_renamed }}
-          files_previous: ${{ steps.file_changes.outputs.files_previous }}
+          PACKAGE_RESULTS: ${{ steps.package.outputs.result }}
         with:
-          script: |
-            console.log(context)
-            console.log('files', process.env.files);
-            console.log('files_added', process.env.files_added);
-            console.log('files_modified', process.env.files_modified);
-            console.log('files_removed', process.env.files_removed);
-            console.log('files_renamed', process.env.files_renamed);
-            console.log('files_previous', process.env.files_previous);
-            const path = require('path');
-            const added = JSON.parse(process.env.files_added);
-            const modified = JSON.parse(process.env.files_modified);
-            const renamed = JSON.parse(process.env.files_renamed);
-            const removed = JSON.parse(process.env.files_removed);
-            const previous = JSON.parse(process.env.files_previous);
-            console.log(Array.isArray(added));
-
-            function isLightningMetadataPath(file) {
-              return  file.includes('/aura/') || file.includes('/lwc/');
-            }
-            function isStaticresourceMetadataPath(file) {
-              return file.includes('/staticresources/');
-            }
-            function isSpecificMetadataPath(file) {
-              return isLightningMetadataPath(file) || isStaticresourceMetadataPath(file);
-            }
-
-            function getCommonMetadataPath(file) {
-              const filePathParts = path.dirname(file).split(path.sep);
-              const metadataFolderIndex = (filePathParts.includes('aura') && filePathParts.indexOf('aura'))
-                || (filePathParts.includes('lwc') && filePathParts.indexOf('lwc'))
-                || (filePathParts.includes('staticresources') && filePathParts.indexOf('staticresources'));
-              return filePathParts.slice(0, metadataFolderIndex + 2).join(path.sep);
-            }
-            function getStaticresourceMetadataPath(file) {
-              if (path.extname(file) === '.xml') {
-                return path.join(path.dirname(file), path.basename(file).split('.')[0])
-              }
-              return getCommonMetadataPath(file);
-            }
-            function getMetadataPath(file) {
-              return (isLightningMetadataPath(file) && getCommonMetadataPath(file))
-                || (isStaticresourceMetadataPath(file) && getStaticresourceMetadataPath(file))
-                || file;
-            }
-
-            let deployMetadata = new Set([...added, ...modified, ...renamed].map((file) => getMetadataPath(file)));
-
-            const deleteMetadata = new Set(previous.map((file) => getMetadataPath(file)));
-
-            removed.forEach((file) => {
-              if (isSpecificMetadataPath(file) && path.extname(file) !== '.xml') {
-                deployMetadata.add(getCommonMetadataPath(file));
-              } else {
-                deleteMetadata.add(getMetadataPath(file));
-              }
-            });
-
-            deployMetadata = new Set([...deployMetadata].filter((file) => !deleteMetadata.has(file)));
-
-            console.log(deployMetadata)
-            console.log(deleteMetadata)
-            core.setOutput('deploy-paths', `"${Array.from(deployMetadata).join(', \\\n')}"`)
-            core.setOutput('delete-paths', `"${Array.from(deleteMetadata).join(', \\\n')}"`)
+          run: |
+            console.log(process.env.PACKAGE_RESULTS)
