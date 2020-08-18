@@ -62,7 +62,7 @@ jobs:
               throw new Error(`${packageResult.name}: ${packageResult.message}`)
             }
 
-            await github.git.createTag({
+            const tag = await github.git.createTag({
               owner: context.repo.owner,
               repo: context.repo.repo,
               tag: `v${context.payload.inputs.version}`,
@@ -70,3 +70,5 @@ jobs:
               object: context.sha,
               type: 'commit',
             });
+
+            console.log(tag)
