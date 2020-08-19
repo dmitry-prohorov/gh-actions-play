@@ -45,28 +45,26 @@ jobs:
           node_modules/sfdx-cli/bin/run force:auth:jwt:grant --clientid ${{ secrets.SF_UTILS_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.AUTOMATION_ORG_USERNAME}} --setdefaultdevhubusername -a automation
         env:
           SALESFORCE_JWT_SECRET_KEY: ${{ secrets.UTILS_JWT_SECRET_KEY }}
-      - name: Create package
-        id: package
-        run: |
-          echo ::set-output name=result::$(node_modules/sfdx-cli/bin/run force:package1:version:create -m -w 60 -n ${{ steps.prepare.outputs.package-name }} -v ${{ github.event.inputs.version }} -u automation -i ${{ secrets.PACKAGE_ID }} --json)
-      - name: Extract package results
-        id: result
-        uses: actions/github-script@v2
-        env:
-          PACKAGE_RESULTS: ${{ steps.package.outputs.result }}
-        with:
-          script: |
-            console.log(process.env.PACKAGE_RESULTS)
-            const packageResult = JSON.parse(process.env.PACKAGE_RESULTS)
-            if (packageResult.status !== 0) {
-              throw new Error(`${packageResult.name}: ${packageResult.message}`)
-            }
+      # - name: Create package
+      #   id: package
+      #   run: |
+      #     echo ::set-output name=result::$(node_modules/sfdx-cli/bin/run force:package1:version:create -m -w 60 -n ${{ steps.prepare.outputs.package-name }} -v ${{ github.event.inputs.version }} -u automation -i ${{ secrets.PACKAGE_ID }} --json)
+      # - name: Extract package results
+      #   id: result
+      #   uses: actions/github-script@v2
+      #   env:
+      #     PACKAGE_RESULTS: ${{ steps.package.outputs.result }}
+      #   with:
+      #     script: |
+      #       console.log(process.env.PACKAGE_RESULTS)
+      #       const packageResult = JSON.parse(process.env.PACKAGE_RESULTS)
+      #       if (packageResult.status !== 0) {
+      #         throw new Error(`${packageResult.name}: ${packageResult.message}`)
+      #       }
 
-            core.setOutput('package-version-id', packageResult.result.MetadataPackageVersionId)
+      #       core.setOutput('package-version-id', packageResult.result.MetadataPackageVersionId)
       - name: Create tag
         uses: actions/github-script@v2
-        env:
-          PACKAGE_RESULTS: ${{ steps.package.outputs.result }}
         with:
           github-token: ${{ secrets.DPRO_TOKEN }}
           script: |
