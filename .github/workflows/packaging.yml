@@ -87,7 +87,7 @@ jobs:
             })
             console.log(ref)
       - name: Create release
-        uses:
+        uses: actions/github-script@v2
         with:
           script: |
             const releases = await github.repos.listReleases({
