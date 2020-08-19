@@ -108,4 +108,4 @@ jobs:
               sha: latestRelease.commit.sha
             });
 
-            console.log(commits.data[0])
+            console.log(commits.data[commits.data.length - 1])
