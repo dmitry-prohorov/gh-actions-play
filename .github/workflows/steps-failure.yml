@@ -29,9 +29,11 @@ jobs:
         uses: actions/github-script@v2
         env:
           STEPS: ${{ toJson(steps) }}
+          CONTEXT: ${{ toJson(github) }}
         with:
           script: |
             console.log(process.env.STEPS)
+            console.log(process.env.CONTEXT)
       - name: Finish step
         uses: actions/github-script@v2
         with:
