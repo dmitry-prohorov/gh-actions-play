@@ -23,8 +23,9 @@ jobs:
         uses: actions/github-script@v2
         with:
           script: |
-            throw new Error('123')
-      - name: First step
+            // throw new Error('123')
+            console.log('joking no error')
+      - name: Catch failure step
         if: failure()
         uses: actions/github-script@v2
         env:
