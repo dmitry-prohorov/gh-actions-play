@@ -1,0 +1,39 @@
+name: PackagingCI
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: First step
+        uses: actions/github-script@v2
+        with:
+          script: |
+            console.log('hello')
+      - name: Success step
+        uses: actions/github-script@v2
+        env:
+          STEPS: ${{ toJson(steps) }}
+        with:
+          script: |
+            console.log(process.env.STEPS)
+      - name: Fail step
+        uses: actions/github-script@v2
+        with:
+          script: |
+            throw new Error('123')
+      - name: First step
+        if: failure()
+        uses: actions/github-script@v2
+        env:
+          STEPS: ${{ toJson(steps) }}
+        with:
+          script: |
+            console.log(process.env.STEPS)
+      - name: Finish step
+        uses: actions/github-script@v2
+        with:
+          script: |
+            console.log('finish')
