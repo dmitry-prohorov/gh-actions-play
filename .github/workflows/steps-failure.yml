@@ -1,4 +1,4 @@
-name: PackagingCI
+name: StepsFailureCI
 
 on:
   workflow_dispatch:
