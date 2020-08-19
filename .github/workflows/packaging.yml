@@ -106,6 +106,6 @@ jobs:
               sha: latestRelease.commit.sha
             });
 
-            for (const commit of commits) {
+            for (const commit of commits.data) {
               console.log(commit)
             }
