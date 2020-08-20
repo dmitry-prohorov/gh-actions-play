@@ -87,6 +87,8 @@ jobs:
             console.log(ref)
       - name: Create release
         uses: actions/github-script@v2
+        env:
+          STEPS: ${{ toJson(steps) }}
         with:
           script: |
             console.log(context)
@@ -97,7 +99,7 @@ jobs:
               draft: true,
               name: `Playground (${context.payload.inputs.version})`,
               body: `
-              ### [Installation link](https://login.salesforce.com/packaging/installPackage.apexp?p0=${context.payload.steps.result.outputs.package-version-id})
+              ### [Installation link](https://login.salesforce.com/packaging/installPackage.apexp?p0=${process.env.STEPS.result.outputs.package-version-id})
 
               ### Resolved issues:
               `,
