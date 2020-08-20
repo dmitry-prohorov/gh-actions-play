@@ -6,6 +6,10 @@ on:
       version:
         required: true
         description: Version number to specify for creating package
+      package-name:
+        required: true
+        description: Package name
+        default: Dpro Play Package
 
 jobs:
   create-package:
@@ -17,7 +21,7 @@ jobs:
         uses: actions/github-script@v2
         with:
           script: |
-            core.setOutput('package-name', `"Dpro Play Package (v${context.payload.inputs.version})"`)
+            core.setOutput('package-name', `"${context.payload.inputs.package-name} (v${context.payload.inputs.version})"`)
       - uses: actions/setup-node@v2-beta
         with:
           node-version: "13.x"
@@ -91,15 +95,13 @@ jobs:
           PACKAGE_ID: ${{ steps.packaging.outputs.package-version-id }}
         with:
           script: |
-            console.log(process.env.PACKAGE_ID)
             await github.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
               tag_name: `v${context.payload.inputs.version}`,
               draft: true,
-              name: `Playground (${context.payload.inputs.version})`,
-              body: `
-              ### [Installation link](https://login.salesforce.com/packaging/installPackage.apexp?p0=${process.env.PACKAGE_ID})
+              name: `${context.payload.inputs.package-name} (${context.payload.inputs.version})`,
+              body: `### [Installation link](https://login.salesforce.com/packaging/installPackage.apexp?p0=${process.env.PACKAGE_ID})
 
               ### Resolved issues:
               `,
