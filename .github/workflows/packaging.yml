@@ -50,7 +50,7 @@ jobs:
         run: |
           # echo ::set-output name=result::$(node_modules/sfdx-cli/bin/run force:package1:version:create -m -w 60 -n ${{ steps.prepare.outputs.package-name }} -v ${{ github.event.inputs.version }} -u automation -i ${{ secrets.PACKAGE_ID }} --json)
       - name: Extract package results
-        id: result
+        id: package-results
         uses: actions/github-script@v2
         env:
           PACKAGE_RESULTS: ${{ steps.package.outputs.result }}
@@ -91,7 +91,7 @@ jobs:
           STEPS: ${{ toJson(steps) }}
         with:
           script: |
-            console.log(context)
+            console.log(process.env.STEPS)
             await github.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -99,7 +99,7 @@ jobs:
               draft: true,
               name: `Playground (${context.payload.inputs.version})`,
               body: `
-              ### [Installation link](https://login.salesforce.com/packaging/installPackage.apexp?p0=${process.env.STEPS.result.outputs.package-version-id})
+              ### [Installation link](https://login.salesforce.com/packaging/installPackage.apexp?p0=${process.env.STEPS.package-results.outputs.package-version-id})
 
               ### Resolved issues:
               `,
