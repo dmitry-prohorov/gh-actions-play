@@ -56,13 +56,13 @@ jobs:
           PACKAGE_RESULTS: ${{ steps.package.outputs.result }}
         with:
           script: |
-            # console.log(process.env.PACKAGE_RESULTS)
-            # const packageResult = JSON.parse(process.env.PACKAGE_RESULTS)
-            # if (packageResult.status !== 0) {
-            #   throw new Error(`${packageResult.name}: ${packageResult.message}`)
-            # }
+            /* console.log(process.env.PACKAGE_RESULTS)
+            const packageResult = JSON.parse(process.env.PACKAGE_RESULTS)
+            if (packageResult.status !== 0) {
+              throw new Error(`${packageResult.name}: ${packageResult.message}`)
+            }
 
-            # core.setOutput('package-version-id', packageResult.result.MetadataPackageVersionId)
+            core.setOutput('package-version-id', packageResult.result.MetadataPackageVersionId)*/
             core.setOutput('package-version-id', '123')
       - name: Create tag
         uses: actions/github-script@v2
