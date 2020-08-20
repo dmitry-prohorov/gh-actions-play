@@ -100,7 +100,7 @@ jobs:
               repo: context.repo.repo,
               tag_name: `v${context.payload.inputs.version}`,
               draft: true,
-              name: `${context.payload.inputs.package-name} (${context.payload.inputs.version})`,
+              name: `${context.payload.inputs.name} (${context.payload.inputs.version})`,
               body: `### [Installation link](https://login.salesforce.com/packaging/installPackage.apexp?p0=${process.env.PACKAGE_ID})
 
               ### Resolved issues:
