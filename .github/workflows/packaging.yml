@@ -6,7 +6,7 @@ on:
       version:
         required: true
         description: Version number to specify for creating package
-      package-name:
+      name:
         required: true
         description: Package name
         default: Dpro Play Package
@@ -21,7 +21,7 @@ jobs:
         uses: actions/github-script@v2
         with:
           script: |
-            core.setOutput('package-name', `"${context.payload.inputs.package-name} (v${context.payload.inputs.version})"`)
+            core.setOutput('package-name', `"${context.payload.inputs.name} (v${context.payload.inputs.version})"`)
       - uses: actions/setup-node@v2-beta
         with:
           node-version: "13.x"
