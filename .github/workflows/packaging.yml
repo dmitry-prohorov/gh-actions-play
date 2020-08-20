@@ -45,24 +45,25 @@ jobs:
           node_modules/sfdx-cli/bin/run force:auth:jwt:grant --clientid ${{ secrets.SF_UTILS_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.AUTOMATION_ORG_USERNAME}} --setdefaultdevhubusername -a automation
         env:
           SALESFORCE_JWT_SECRET_KEY: ${{ secrets.UTILS_JWT_SECRET_KEY }}
-      # - name: Create package
-      #   id: package
-      #   run: |
-      #     echo ::set-output name=result::$(node_modules/sfdx-cli/bin/run force:package1:version:create -m -w 60 -n ${{ steps.prepare.outputs.package-name }} -v ${{ github.event.inputs.version }} -u automation -i ${{ secrets.PACKAGE_ID }} --json)
-      # - name: Extract package results
-      #   id: result
-      #   uses: actions/github-script@v2
-      #   env:
-      #     PACKAGE_RESULTS: ${{ steps.package.outputs.result }}
-      #   with:
-      #     script: |
-      #       console.log(process.env.PACKAGE_RESULTS)
-      #       const packageResult = JSON.parse(process.env.PACKAGE_RESULTS)
-      #       if (packageResult.status !== 0) {
-      #         throw new Error(`${packageResult.name}: ${packageResult.message}`)
-      #       }
+      - name: Create package
+        id: package
+        run: |
+          # echo ::set-output name=result::$(node_modules/sfdx-cli/bin/run force:package1:version:create -m -w 60 -n ${{ steps.prepare.outputs.package-name }} -v ${{ github.event.inputs.version }} -u automation -i ${{ secrets.PACKAGE_ID }} --json)
+      - name: Extract package results
+        id: result
+        uses: actions/github-script@v2
+        env:
+          PACKAGE_RESULTS: ${{ steps.package.outputs.result }}
+        with:
+          script: |
+            # console.log(process.env.PACKAGE_RESULTS)
+            # const packageResult = JSON.parse(process.env.PACKAGE_RESULTS)
+            # if (packageResult.status !== 0) {
+            #   throw new Error(`${packageResult.name}: ${packageResult.message}`)
+            # }
 
-      #       core.setOutput('package-version-id', packageResult.result.MetadataPackageVersionId)
+            # core.setOutput('package-version-id', packageResult.result.MetadataPackageVersionId)
+            core.setOutput('package-version-id', '123')
       - name: Create tag
         uses: actions/github-script@v2
         with:
@@ -88,24 +89,15 @@ jobs:
         uses: actions/github-script@v2
         with:
           script: |
-            const releases = await github.repos.listReleases({
-              owner: context.repo.owner,
-              repo: context.repo.repo
-            })
-            const tags = await github.repos.listTags({
-              owner: context.repo.owner,
-              repo: context.repo.repo
-            })
-            const latestTagName = (releases.data[0] || {}).tag_name
-            const latestRelease = tags.data.find(tag => !latestTagName || tag.name === latestTagName)
-
-            const commits = await github.repos.listCommits({
+            await github.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              per_page: 100,
-              sha: latestRelease.commit.sha
-            });
+              tag_name: `v${context.payload.inputs.version}`,
+              draft: true,
+              name: `Playground (${context.payload.inputs.version})`,
+              body: `
+              ### [Installation link](https://login.salesforce.com/packaging/installPackage.apexp?p0=${context.payload.steps.result.outputs.package-version-id})
 
-            for (const commit of commits.data) {
-              console.log(commit)
-            }
+              ### Resolved issues:
+              `,
+            })
