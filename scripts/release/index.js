@@ -7,6 +7,7 @@ module.exports = async ({ github, context }) => {
     `--pretty='format:"%h: %b"'`,
     `${context.payload.pull_request.base.sha}..${context.payload.pull_request.head.sha}`
   ]);
+  console.log(stdout);
   const issue_numbers = new Set();
   const matches = stdout.match(/#([\d]+)/g);
   console.log(matches);
