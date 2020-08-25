@@ -20,23 +20,27 @@ jobs:
       delete-paths: ${{ steps.check.outputs.delete-paths }}
       deploy-paths: ${{ steps.check.outputs.deploy-paths }}
     steps:
-      - name: Setup job environment
-        uses: actions/github-script@v2
+      - name: Context
         env:
-          SECRETS: ${{ toJson(secrets) }}
-        with:
-          script: |
-            const startSha = context.payload.inputs.start;
-            const endSha = context.payload.inputs.end || context.sha;
-            const secrets = JSON.parse(process.env.SECRETS)
+          CONTEXT: ${{ toJSON(github) }}
+        run: echo "$CONTEXT"
+#       - name: Setup job environment
+#         uses: actions/github-script@v2
+#         env:
+#           SECRETS: ${{ toJson(secrets) }}
+#         with:
+#           script: |
+#             const startSha = context.payload.inputs.start;
+#             const endSha = context.payload.inputs.end || context.sha;
+#             const secrets = JSON.parse(process.env.SECRETS)
 
-            core.exportVariable('ORG_USERNAME', secrets[`${context.payload.inputs.org.toUpperCase()}_USERNAME`])
-            core.exportVariable('ORG_CONSUMER_KEY', secrets[`${context.payload.inputs.org.toUpperCase()}_CONSUMER_KEY`])
-            core.exportVariable('START_SHA', startSha)
-            core.exportVariable('END_SHA', endSha)
-      - name: Test
-        run: |
-          echo "${ORG_USERNAME}"
+#             core.exportVariable('ORG_USERNAME', secrets[`${context.payload.inputs.org.toUpperCase()}_USERNAME`])
+#             core.exportVariable('ORG_CONSUMER_KEY', secrets[`${context.payload.inputs.org.toUpperCase()}_CONSUMER_KEY`])
+#             core.exportVariable('START_SHA', startSha)
+#             core.exportVariable('END_SHA', endSha)
+#       - name: Test
+#         run: |
+#           echo "${ORG_USERNAME}"
         # run: |
         #   FIRST_COMMIT=$(git rev-list --max-parents=0 HEAD)
         #   echo "$FIRST_COMMIT"
