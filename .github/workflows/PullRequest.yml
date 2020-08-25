@@ -23,8 +23,6 @@ jobs:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
-    - name:  Checks
-      run: git log --no-merges master..hotfix/v5.1
 
     - name: Context
       uses: actions/github-script@v2
