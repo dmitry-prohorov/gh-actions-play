@@ -24,6 +24,16 @@ jobs:
         env:
           CONTEXT: ${{ toJSON(github) }}
         run: echo "$CONTEXT"
+      - name: Get branch
+        uses: actions/github-script@v3
+        with:
+          script: |
+            const branch = await github.repos.getBranch({
+              repo: context.repo.repo,
+              owner: context.repo.owner,
+              branch: 'master'
+            })
+            console.log(branch)
 #       - name: Setup job environment
 #         uses: actions/github-script@v2
 #         env:
