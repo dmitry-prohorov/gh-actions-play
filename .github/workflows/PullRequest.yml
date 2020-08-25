@@ -45,7 +45,7 @@ jobs:
           } else {
             const issue = await github.issues.create({
               ...request,
-              title: `['Test Coverage']: Fix tests in branch "${context.ref}".`,
+              title: `['Test Coverage']: Fix tests in branch "${context.payload.pull_request.head.ref}".`,
               assignees: [context.actor],
               labels: ['bug']
             })
