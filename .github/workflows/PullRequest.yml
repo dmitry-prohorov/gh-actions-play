@@ -29,7 +29,8 @@ jobs:
       with:
         script: |
           const script = require(`${process.env.GITHUB_WORKSPACE}/scripts/release/dist/index.js`)
-          console.log(script({github, context}))
+          const result = await script({github, context})
+          console.log(result)
           console.log(context)
           console.log(context.payload.pull_request.body)
           
