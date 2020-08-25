@@ -43,11 +43,18 @@ jobs:
           if (issue_number) {
             await github.issues.createComment({ ...request, issue_number })
           } else {
-            await github.issues.create({
+            const issue = await github.issues.create({
               ...request,
               title: `['Test Coverage']: Fix tests in branch "${context.ref}".`,
               assignees: [context.actor],
               labels: ['bug']
+            })
+            console.log(issue)
+            await github.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              body: `${context.payload.pull_request.body}\n\r\n\r### ISSUE TO RESOLVE: #${issue.number}`
             })
           }
     - name: Skip if draft
