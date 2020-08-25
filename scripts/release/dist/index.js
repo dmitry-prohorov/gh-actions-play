@@ -1,1 +1,2899 @@
-module.exports=function(e,t){"use strict";var n={};function __webpack_require__(t){if(n[t]){return n[t].exports}var r=n[t]={i:t,l:false,exports:{}};var o=true;try{e[t].call(r.exports,r,r.exports,__webpack_require__);o=false}finally{if(o)delete n[t]}r.l=true;return r.exports}__webpack_require__.ab=__dirname+"/";function startup(){return __webpack_require__(932)}return startup()}({1:function(e,t,n){e.exports=isexe;isexe.sync=sync;var r=n(747);function checkPathExt(e,t){var n=t.pathExt!==undefined?t.pathExt:process.env.PATHEXT;if(!n){return true}n=n.split(";");if(n.indexOf("")!==-1){return true}for(var r=0;r<n.length;r++){var o=n[r].toLowerCase();if(o&&e.substr(-o.length).toLowerCase()===o){return true}}return false}function checkStat(e,t,n){if(!e.isSymbolicLink()&&!e.isFile()){return false}return checkPathExt(t,n)}function isexe(e,t,n){r.stat(e,function(r,o){n(r,r?false:checkStat(o,e,t))})}function sync(e,t){return checkStat(r.statSync(e),e,t)}},32:function(e,t,n){"use strict";const r=n(638);e.exports=((e="")=>{const t=e.match(r);if(!t){return null}const[n,o]=t[0].replace(/#! ?/,"").split(" ");const s=n.split("/").pop();if(s==="env"){return o}return o?`${s} ${o}`:s})},47:function(e){"use strict";const t=(e,t)=>{for(const n of Reflect.ownKeys(t)){Object.defineProperty(e,n,Object.getOwnPropertyDescriptor(t,n))}return e};e.exports=t;e.exports.default=t},48:function(e){"use strict";const t=/([()\][%!^"`<>&|;, *?])/g;function escapeCommand(e){e=e.replace(t,"^$1");return e}function escapeArgument(e,n){e=`${e}`;e=e.replace(/(\\*)"/g,'$1$1\\"');e=e.replace(/(\\*)$/,"$1$1");e=`"${e}"`;e=e.replace(t,"^$1");if(n){e=e.replace(t,"^$1")}return e}e.exports.command=escapeCommand;e.exports.argument=escapeArgument},82:function(e,t,n){"use strict";const r=n(47);const o=new WeakMap;const s=(e,t={})=>{if(typeof e!=="function"){throw new TypeError("Expected a function")}let n;let s=0;const i=e.displayName||e.name||"<anonymous>";const c=function(...r){o.set(c,++s);if(s===1){n=e.apply(this,r);e=null}else if(t.throw===true){throw new Error(`Function \`${i}\` can only be called once`)}return n};r(c,e);o.set(c,s);return c};e.exports=s;e.exports.default=s;e.exports.callCount=(e=>{if(!o.has(e)){throw new Error(`The given function \`${e.name}\` is not wrapped by the \`onetime\` package`)}return o.get(e)})},87:function(e){e.exports=require("os")},101:function(e){"use strict";const t=process.platform==="win32";function notFoundError(e,t){return Object.assign(new Error(`${t} ${e.command} ENOENT`),{code:"ENOENT",errno:"ENOENT",syscall:`${t} ${e.command}`,path:e.command,spawnargs:e.args})}function hookChildProcess(e,n){if(!t){return}const r=e.emit;e.emit=function(t,o){if(t==="exit"){const t=verifyENOENT(o,n,"spawn");if(t){return r.call(e,"error",t)}}return r.apply(e,arguments)}}function verifyENOENT(e,n){if(t&&e===1&&!n.file){return notFoundError(n.original,"spawn")}return null}function verifyENOENTSync(e,n){if(t&&e===1&&!n.file){return notFoundError(n.original,"spawnSync")}return null}e.exports={hookChildProcess:hookChildProcess,verifyENOENT:verifyENOENT,verifyENOENTSync:verifyENOENTSync,notFoundError:notFoundError}},126:function(e,t,n){var r=n(747);var o;if(process.platform==="win32"||global.TESTING_WINDOWS){o=n(1)}else{o=n(728)}e.exports=isexe;isexe.sync=sync;function isexe(e,t,n){if(typeof t==="function"){n=t;t={}}if(!n){if(typeof Promise!=="function"){throw new TypeError("callback not provided")}return new Promise(function(n,r){isexe(e,t||{},function(e,t){if(e){r(e)}else{n(t)}})})}o(e,t||{},function(e,r){if(e){if(e.code==="EACCES"||t&&t.ignoreErrors){e=null;r=false}}n(e,r)})}function sync(e,t){try{return o.sync(e,t||{})}catch(e){if(t&&t.ignoreErrors||e.code==="EACCES"){return false}else{throw e}}}},129:function(e){e.exports=require("child_process")},166:function(e){"use strict";const t=["stdin","stdout","stderr"];const n=e=>t.some(t=>e[t]!==undefined);const r=e=>{if(!e){return}const{stdio:r}=e;if(r===undefined){return t.map(t=>e[t])}if(n(e)){throw new Error(`It's not possible to provide \`stdio\` in combination with one of ${t.map(e=>`\`${e}\``).join(", ")}`)}if(typeof r==="string"){return r}if(!Array.isArray(r)){throw new TypeError(`Expected \`stdio\` to be of type \`string\` or \`Array\`, got \`${typeof r}\``)}const o=Math.max(r.length,t.length);return Array.from({length:o},(e,t)=>r[t])};e.exports=r;e.exports.node=(e=>{const t=r(e);if(t==="ipc"){return"ipc"}if(t===undefined||typeof t==="string"){return[t,t,t,"ipc"]}if(t.includes("ipc")){return t}return[...t,"ipc"]})},174:function(e){"use strict";e.exports=(e=>{const t=typeof e==="string"?"\n":"\n".charCodeAt();const n=typeof e==="string"?"\r":"\r".charCodeAt();if(e[e.length-1]===t){e=e.slice(0,e.length-1)}if(e[e.length-1]===n){e=e.slice(0,e.length-1)}return e})},187:function(e,t,n){"use strict";const{signalsByName:r}=n(779);const o=({timedOut:e,timeout:t,errorCode:n,signal:r,signalDescription:o,exitCode:s,isCanceled:i})=>{if(e){return`timed out after ${t} milliseconds`}if(i){return"was canceled"}if(n!==undefined){return`failed with ${n}`}if(r!==undefined){return`was killed with ${r} (${o})`}if(s!==undefined){return`failed with exit code ${s}`}return"failed"};const s=({stdout:e,stderr:t,all:n,error:s,signal:i,exitCode:c,command:a,timedOut:u,isCanceled:d,killed:f,parsed:{options:{timeout:l}}})=>{c=c===null?undefined:c;i=i===null?undefined:i;const p=i===undefined?undefined:r[i].description;const m=s&&s.code;const h=o({timedOut:u,timeout:l,errorCode:m,signal:i,signalDescription:p,exitCode:c,isCanceled:d});const x=`Command ${h}: ${a}`;const g=Object.prototype.toString.call(s)==="[object Error]";const y=g?`${x}\n${s.message}`:x;const v=[y,t,e].filter(Boolean).join("\n");if(g){s.originalMessage=s.message;s.message=v}else{s=new Error(v)}s.shortMessage=y;s.command=a;s.exitCode=c;s.signal=i;s.signalDescription=p;s.stdout=e;s.stderr=t;if(n!==undefined){s.all=n}if("bufferedData"in s){delete s.bufferedData}s.failed=true;s.timedOut=Boolean(u);s.isCanceled=d;s.killed=f&&!u;return s};e.exports=s},205:function(e,t,n){var r=n(223);var o=function(){};var s=function(e){return e.setHeader&&typeof e.abort==="function"};var i=function(e){return e.stdio&&Array.isArray(e.stdio)&&e.stdio.length===3};var c=function(e,t,n){if(typeof t==="function")return c(e,null,t);if(!t)t={};n=r(n||o);var a=e._writableState;var u=e._readableState;var d=t.readable||t.readable!==false&&e.readable;var f=t.writable||t.writable!==false&&e.writable;var l=false;var p=function(){if(!e.writable)m()};var m=function(){f=false;if(!d)n.call(e)};var h=function(){d=false;if(!f)n.call(e)};var x=function(t){n.call(e,t?new Error("exited with error code: "+t):null)};var g=function(t){n.call(e,t)};var y=function(){process.nextTick(v)};var v=function(){if(l)return;if(d&&!(u&&(u.ended&&!u.destroyed)))return n.call(e,new Error("premature close"));if(f&&!(a&&(a.ended&&!a.destroyed)))return n.call(e,new Error("premature close"))};var b=function(){e.req.on("finish",m)};if(s(e)){e.on("complete",m);e.on("abort",y);if(e.req)b();else e.on("request",b)}else if(f&&!a){e.on("end",p);e.on("close",p)}if(i(e))e.on("exit",x);e.on("end",h);e.on("finish",m);if(t.error!==false)e.on("error",g);e.on("close",y);return function(){l=true;e.removeListener("complete",m);e.removeListener("abort",y);e.removeListener("request",b);if(e.req)e.req.removeListener("finish",m);e.removeListener("end",p);e.removeListener("close",p);e.removeListener("finish",m);e.removeListener("exit",x);e.removeListener("end",h);e.removeListener("error",g);e.removeListener("close",y)}};e.exports=c},207:function(e,t,n){const r=process.platform==="win32"||process.env.OSTYPE==="cygwin"||process.env.OSTYPE==="msys";const o=n(622);const s=r?";":":";const i=n(126);const c=e=>Object.assign(new Error(`not found: ${e}`),{code:"ENOENT"});const a=(e,t)=>{const n=t.colon||s;const o=e.match(/\//)||r&&e.match(/\\/)?[""]:[...r?[process.cwd()]:[],...(t.path||process.env.PATH||"").split(n)];const i=r?t.pathExt||process.env.PATHEXT||".EXE;.CMD;.BAT;.COM":"";const c=r?i.split(n):[""];if(r){if(e.indexOf(".")!==-1&&c[0]!=="")c.unshift("")}return{pathEnv:o,pathExt:c,pathExtExe:i}};const u=(e,t,n)=>{if(typeof t==="function"){n=t;t={}}if(!t)t={};const{pathEnv:r,pathExt:s,pathExtExe:u}=a(e,t);const d=[];const f=n=>new Promise((s,i)=>{if(n===r.length)return t.all&&d.length?s(d):i(c(e));const a=r[n];const u=/^".*"$/.test(a)?a.slice(1,-1):a;const f=o.join(u,e);const p=!u&&/^\.[\\\/]/.test(e)?e.slice(0,2)+f:f;s(l(p,n,0))});const l=(e,n,r)=>new Promise((o,c)=>{if(r===s.length)return o(f(n+1));const a=s[r];i(e+a,{pathExt:u},(s,i)=>{if(!s&&i){if(t.all)d.push(e+a);else return o(e+a)}return o(l(e,n,r+1))})});return n?f(0).then(e=>n(null,e),n):f(0)};const d=(e,t)=>{t=t||{};const{pathEnv:n,pathExt:r,pathExtExe:s}=a(e,t);const u=[];for(let c=0;c<n.length;c++){const a=n[c];const d=/^".*"$/.test(a)?a.slice(1,-1):a;const f=o.join(d,e);const l=!d&&/^\.[\\\/]/.test(e)?e.slice(0,2)+f:f;for(let e=0;e<r.length;e++){const n=l+r[e];try{const e=i.sync(n,{pathExt:s});if(e){if(t.all)u.push(n);else return n}}catch(e){}}}if(t.all&&u.length)return u;if(t.nothrow)return null;throw c(e)};e.exports=u;u.sync=d},213:function(e,t){"use strict";Object.defineProperty(t,"__esModule",{value:true});t.SIGNALS=void 0;const n=[{name:"SIGHUP",number:1,action:"terminate",description:"Terminal closed",standard:"posix"},{name:"SIGINT",number:2,action:"terminate",description:"User interruption with CTRL-C",standard:"ansi"},{name:"SIGQUIT",number:3,action:"core",description:"User interruption with CTRL-\\",standard:"posix"},{name:"SIGILL",number:4,action:"core",description:"Invalid machine instruction",standard:"ansi"},{name:"SIGTRAP",number:5,action:"core",description:"Debugger breakpoint",standard:"posix"},{name:"SIGABRT",number:6,action:"core",description:"Aborted",standard:"ansi"},{name:"SIGIOT",number:6,action:"core",description:"Aborted",standard:"bsd"},{name:"SIGBUS",number:7,action:"core",description:"Bus error due to misaligned, non-existing address or paging error",standard:"bsd"},{name:"SIGEMT",number:7,action:"terminate",description:"Command should be emulated but is not implemented",standard:"other"},{name:"SIGFPE",number:8,action:"core",description:"Floating point arithmetic error",standard:"ansi"},{name:"SIGKILL",number:9,action:"terminate",description:"Forced termination",standard:"posix",forced:true},{name:"SIGUSR1",number:10,action:"terminate",description:"Application-specific signal",standard:"posix"},{name:"SIGSEGV",number:11,action:"core",description:"Segmentation fault",standard:"ansi"},{name:"SIGUSR2",number:12,action:"terminate",description:"Application-specific signal",standard:"posix"},{name:"SIGPIPE",number:13,action:"terminate",description:"Broken pipe or socket",standard:"posix"},{name:"SIGALRM",number:14,action:"terminate",description:"Timeout or timer",standard:"posix"},{name:"SIGTERM",number:15,action:"terminate",description:"Termination",standard:"ansi"},{name:"SIGSTKFLT",number:16,action:"terminate",description:"Stack is empty or overflowed",standard:"other"},{name:"SIGCHLD",number:17,action:"ignore",description:"Child process terminated, paused or unpaused",standard:"posix"},{name:"SIGCLD",number:17,action:"ignore",description:"Child process terminated, paused or unpaused",standard:"other"},{name:"SIGCONT",number:18,action:"unpause",description:"Unpaused",standard:"posix",forced:true},{name:"SIGSTOP",number:19,action:"pause",description:"Paused",standard:"posix",forced:true},{name:"SIGTSTP",number:20,action:"pause",description:'Paused using CTRL-Z or "suspend"',standard:"posix"},{name:"SIGTTIN",number:21,action:"pause",description:"Background process cannot read terminal input",standard:"posix"},{name:"SIGBREAK",number:21,action:"terminate",description:"User interruption with CTRL-BREAK",standard:"other"},{name:"SIGTTOU",number:22,action:"pause",description:"Background process cannot write to terminal output",standard:"posix"},{name:"SIGURG",number:23,action:"ignore",description:"Socket received out-of-band data",standard:"bsd"},{name:"SIGXCPU",number:24,action:"core",description:"Process timed out",standard:"bsd"},{name:"SIGXFSZ",number:25,action:"core",description:"File too big",standard:"bsd"},{name:"SIGVTALRM",number:26,action:"terminate",description:"Timeout or timer",standard:"bsd"},{name:"SIGPROF",number:27,action:"terminate",description:"Timeout or timer",standard:"bsd"},{name:"SIGWINCH",number:28,action:"ignore",description:"Terminal window size changed",standard:"bsd"},{name:"SIGIO",number:29,action:"terminate",description:"I/O is available",standard:"other"},{name:"SIGPOLL",number:29,action:"terminate",description:"Watched event",standard:"other"},{name:"SIGINFO",number:29,action:"ignore",description:"Request for process information",standard:"other"},{name:"SIGPWR",number:30,action:"terminate",description:"Device running out of power",standard:"systemv"},{name:"SIGSYS",number:31,action:"core",description:"Invalid system call",standard:"other"},{name:"SIGUNUSED",number:31,action:"terminate",description:"Invalid system call",standard:"other"}];t.SIGNALS=n},223:function(e,t,n){var r=n(940);e.exports=r(once);e.exports.strict=r(onceStrict);once.proto=once(function(){Object.defineProperty(Function.prototype,"once",{value:function(){return once(this)},configurable:true});Object.defineProperty(Function.prototype,"onceStrict",{value:function(){return onceStrict(this)},configurable:true})});function once(e){var t=function(){if(t.called)return t.value;t.called=true;return t.value=e.apply(this,arguments)};t.called=false;return t}function onceStrict(e){var t=function(){if(t.called)throw new Error(t.onceError);t.called=true;return t.value=e.apply(this,arguments)};var n=e.name||"Function wrapped with `once`";t.onceError=n+" shouldn't be called more than once";t.called=false;return t}},252:function(e,t,n){"use strict";const r=n(747);const o=n(32);function readShebang(e){const t=150;const n=Buffer.alloc(t);let s;try{s=r.openSync(e,"r");r.readSync(s,n,0,t,0);r.closeSync(s)}catch(e){}return o(n.toString())}e.exports=readShebang},274:function(e,t,n){"use strict";const r=n(622);const o=n(207);const s=n(539);function resolveCommandAttempt(e,t){const n=e.options.env||process.env;const i=process.cwd();const c=e.options.cwd!=null;const a=c&&process.chdir!==undefined&&!process.chdir.disabled;if(a){try{process.chdir(e.options.cwd)}catch(e){}}let u;try{u=o.sync(e.command,{path:n[s({env:n})],pathExt:t?r.delimiter:undefined})}catch(e){}finally{if(a){process.chdir(i)}}if(u){u=r.resolve(c?e.options.cwd:"",u)}return u}function resolveCommand(e){return resolveCommandAttempt(e)||resolveCommandAttempt(e,true)}e.exports=resolveCommand},286:function(e){"use strict";const t=/ +/g;const n=(e,t=[])=>{if(!Array.isArray(t)){return e}return[e,...t].join(" ")};const r=(e,t,n)=>{if(n===0){return[t]}const r=e[e.length-1];if(r.endsWith("\\")){return[...e.slice(0,-1),`${r.slice(0,-1)} ${t}`]}return[...e,t]};const o=e=>{return e.trim().split(t).reduce(r,[])};e.exports={joinCommand:n,parseCommand:o}},293:function(e){e.exports=require("buffer")},295:function(e,t){"use strict";Object.defineProperty(t,"__esModule",{value:true});t.SIGRTMAX=t.getRealtimeSignals=void 0;const n=function(){const e=s-o+1;return Array.from({length:e},r)};t.getRealtimeSignals=n;const r=function(e,t){return{name:`SIGRT${t+1}`,number:o+t,action:"terminate",description:"Application-specific signal (realtime)",standard:"posix"}};const o=34;const s=64;t.SIGRTMAX=s},341:function(e,t,n){var r=n(223);var o=n(205);var s=n(747);var i=function(){};var c=/^v?\.0/.test(process.version);var a=function(e){return typeof e==="function"};var u=function(e){if(!c)return false;if(!s)return false;return(e instanceof(s.ReadStream||i)||e instanceof(s.WriteStream||i))&&a(e.close)};var d=function(e){return e.setHeader&&a(e.abort)};var f=function(e,t,n,s){s=r(s);var c=false;e.on("close",function(){c=true});o(e,{readable:t,writable:n},function(e){if(e)return s(e);c=true;s()});var f=false;return function(t){if(c)return;if(f)return;f=true;if(u(e))return e.close(i);if(d(e))return e.abort();if(a(e.destroy))return e.destroy();s(t||new Error("stream was destroyed"))}};var l=function(e){e()};var p=function(e,t){return e.pipe(t)};var m=function(){var e=Array.prototype.slice.call(arguments);var t=a(e[e.length-1]||i)&&e.pop()||i;if(Array.isArray(e[0]))e=e[0];if(e.length<2)throw new Error("pump requires two streams per minimum");var n;var r=e.map(function(o,s){var i=s<e.length-1;var c=s>0;return f(o,i,c,function(e){if(!n)n=e;if(e)r.forEach(l);if(i)return;r.forEach(l);t(n)})});return e.reduce(p)};e.exports=m},357:function(e){e.exports=require("assert")},413:function(e){e.exports=require("stream")},435:function(e,t,n){"use strict";Object.defineProperty(t,"__esModule",{value:true});t.getSignals=void 0;var r=n(87);var o=n(213);var s=n(295);const i=function(){const e=(0,s.getRealtimeSignals)();const t=[...o.SIGNALS,...e].map(c);return t};t.getSignals=i;const c=function({name:e,number:t,description:n,action:o,forced:s=false,standard:i}){const{signals:{[e]:c}}=r.constants;const a=c!==undefined;const u=a?c:t;return{name:e,number:u,description:n,supported:a,action:o,forced:s,standard:i}}},447:function(e,t,n){"use strict";const r=n(622);const o=n(129);const s=n(746);const i=n(174);const c=n(502);const a=n(82);const u=n(187);const d=n(166);const{spawnedKill:f,spawnedCancel:l,setupTimeout:p,setExitHandler:m}=n(819);const{handleInput:h,getSpawnedResult:x,makeAllStream:g,validateInputSync:y}=n(592);const{mergePromise:v,getSpawnedPromise:b}=n(814);const{joinCommand:S,parseCommand:w}=n(286);const E=1e3*1e3*100;const I=({env:e,extendEnv:t,preferLocal:n,localDir:r,execPath:o})=>{const s=t?{...process.env,...e}:e;if(n){return c.env({env:s,cwd:r,execPath:o})}return s};const T=(e,t,n={})=>{const o=s._parse(e,t,n);e=o.command;t=o.args;n=o.options;n={maxBuffer:E,buffer:true,stripFinalNewline:true,extendEnv:true,preferLocal:false,localDir:n.cwd||process.cwd(),execPath:process.execPath,encoding:"utf8",reject:true,cleanup:true,all:false,windowsHide:true,...n};n.env=I(n);n.stdio=d(n);if(process.platform==="win32"&&r.basename(e,".exe")==="cmd"){t.unshift("/q")}return{file:e,args:t,options:n,parsed:o}};const C=(e,t,n)=>{if(typeof t!=="string"&&!Buffer.isBuffer(t)){return n===undefined?undefined:""}if(e.stripFinalNewline){return i(t)}return t};const G=(e,t,n)=>{const r=T(e,t,n);const i=S(e,t);let c;try{c=o.spawn(r.file,r.args,r.options)}catch(e){const t=new o.ChildProcess;const n=Promise.reject(u({error:e,stdout:"",stderr:"",all:"",command:i,parsed:r,timedOut:false,isCanceled:false,killed:false}));return v(t,n)}const d=b(c);const y=p(c,r.options,d);const w=m(c,r.options,y);const E={isCanceled:false};c.kill=f.bind(null,c.kill.bind(c));c.cancel=l.bind(null,c,E);const I=async()=>{const[{error:e,exitCode:t,signal:n,timedOut:o},s,a,d]=await x(c,r.options,w);const f=C(r.options,s);const l=C(r.options,a);const p=C(r.options,d);if(e||t!==0||n!==null){const s=u({error:e,exitCode:t,signal:n,stdout:f,stderr:l,all:p,command:i,parsed:r,timedOut:o,isCanceled:E.isCanceled,killed:c.killed});if(!r.options.reject){return s}throw s}return{command:i,exitCode:0,stdout:f,stderr:l,all:p,failed:false,timedOut:false,isCanceled:false,killed:false}};const G=a(I);s._enoent.hookChildProcess(c,r.parsed);h(c,r.options.input);c.all=g(c,r.options);return v(c,G)};e.exports=G;e.exports.sync=((e,t,n)=>{const r=T(e,t,n);const s=S(e,t);y(r.options);let i;try{i=o.spawnSync(r.file,r.args,r.options)}catch(e){throw u({error:e,stdout:"",stderr:"",all:"",command:s,parsed:r,timedOut:false,isCanceled:false,killed:false})}const c=C(r.options,i.stdout,i.error);const a=C(r.options,i.stderr,i.error);if(i.error||i.status!==0||i.signal!==null){const e=u({stdout:c,stderr:a,error:i.error,signal:i.signal,exitCode:i.status,command:s,parsed:r,timedOut:i.error&&i.error.code==="ETIMEDOUT",isCanceled:false,killed:i.signal!==null});if(!r.options.reject){return e}throw e}return{command:s,exitCode:0,stdout:c,stderr:a,failed:false,timedOut:false,isCanceled:false,killed:false}});e.exports.command=((e,t)=>{const[n,...r]=w(e);return G(n,r,t)});e.exports.commandSync=((e,t)=>{const[n,...r]=w(e);return G.sync(n,r,t)});e.exports.node=((e,t,n={})=>{if(t&&!Array.isArray(t)&&typeof t==="object"){n=t;t=[]}const r=d.node(n);const{nodePath:o=process.execPath,nodeOptions:s=process.execArgv}=n;return G(o,[...s,e,...Array.isArray(t)?t:[]],{...n,stdin:undefined,stdout:undefined,stderr:undefined,stdio:r,shell:false})})},502:function(e,t,n){"use strict";const r=n(622);const o=n(539);const s=e=>{e={cwd:process.cwd(),path:process.env[o()],execPath:process.execPath,...e};let t;let n=r.resolve(e.cwd);const s=[];while(t!==n){s.push(r.join(n,"node_modules/.bin"));t=n;n=r.resolve(n,"..")}const i=r.resolve(e.cwd,e.execPath,"..");s.push(i);return s.concat(e.path).join(r.delimiter)};e.exports=s;e.exports.default=s;e.exports.env=(t=>{t={env:process.env,...t};const n={...t.env};const r=o({env:n});t.path=n[r];n[r]=e.exports(t);return n})},539:function(e){"use strict";const t=(e={})=>{const t=e.env||process.env;const n=e.platform||process.platform;if(n!=="win32"){return"PATH"}return Object.keys(t).reverse().find(e=>e.toUpperCase()==="PATH")||"Path"};e.exports=t;e.exports.default=t},554:function(e){"use strict";const t=e=>e!==null&&typeof e==="object"&&typeof e.pipe==="function";t.writable=(e=>t(e)&&e.writable!==false&&typeof e._write==="function"&&typeof e._writableState==="object");t.readable=(e=>t(e)&&e.readable!==false&&typeof e._read==="function"&&typeof e._readableState==="object");t.duplex=(e=>t.writable(e)&&t.readable(e));t.transform=(e=>t.duplex(e)&&typeof e._transform==="function"&&typeof e._transformState==="object");e.exports=t},585:function(e,t,n){"use strict";const{PassThrough:r}=n(413);e.exports=(e=>{e={...e};const{array:t}=e;let{encoding:n}=e;const o=n==="buffer";let s=false;if(t){s=!(n||o)}else{n=n||"utf8"}if(o){n=null}const i=new r({objectMode:s});if(n){i.setEncoding(n)}let c=0;const a=[];i.on("data",e=>{a.push(e);if(s){c=a.length}else{c+=e.length}});i.getBufferedValue=(()=>{if(t){return a}return o?Buffer.concat(a,c):a.join("")});i.getBufferedLength=(()=>c);return i})},592:function(e,t,n){"use strict";const r=n(554);const o=n(766);const s=n(621);const i=(e,t)=>{if(t===undefined||e.stdin===undefined){return}if(r(t)){t.pipe(e.stdin)}else{e.stdin.end(t)}};const c=(e,{all:t})=>{if(!t||!e.stdout&&!e.stderr){return}const n=s();if(e.stdout){n.add(e.stdout)}if(e.stderr){n.add(e.stderr)}return n};const a=async(e,t)=>{if(!e){return}e.destroy();try{return await t}catch(e){return e.bufferedData}};const u=(e,{encoding:t,buffer:n,maxBuffer:r})=>{if(!e||!n){return}if(t){return o(e,{encoding:t,maxBuffer:r})}return o.buffer(e,{maxBuffer:r})};const d=async({stdout:e,stderr:t,all:n},{encoding:r,buffer:o,maxBuffer:s},i)=>{const c=u(e,{encoding:r,buffer:o,maxBuffer:s});const d=u(t,{encoding:r,buffer:o,maxBuffer:s});const f=u(n,{encoding:r,buffer:o,maxBuffer:s*2});try{return await Promise.all([i,c,d,f])}catch(r){return Promise.all([{error:r,signal:r.signal,timedOut:r.timedOut},a(e,c),a(t,d),a(n,f)])}};const f=({input:e})=>{if(r(e)){throw new TypeError("The `input` option cannot be a stream in sync mode")}};e.exports={handleInput:i,makeAllStream:c,getSpawnedResult:d,validateInputSync:f}},614:function(e){e.exports=require("events")},621:function(e,t,n){"use strict";const{PassThrough:r}=n(413);e.exports=function(){var e=[];var t=new r({objectMode:true});t.setMaxListeners(0);t.add=add;t.isEmpty=isEmpty;t.on("unpipe",remove);Array.prototype.slice.call(arguments).forEach(add);return t;function add(n){if(Array.isArray(n)){n.forEach(add);return this}e.push(n);n.once("end",remove.bind(null,n));n.once("error",t.emit.bind(t,"error"));n.pipe(t,{end:false});return this}function isEmpty(){return e.length==0}function remove(n){e=e.filter(function(e){return e!==n});if(!e.length&&t.readable){t.end()}}}},622:function(e){e.exports=require("path")},638:function(e){"use strict";e.exports=/^#!(.*)/},710:function(e){e.exports=["SIGABRT","SIGALRM","SIGHUP","SIGINT","SIGTERM"];if(process.platform!=="win32"){e.exports.push("SIGVTALRM","SIGXCPU","SIGXFSZ","SIGUSR2","SIGTRAP","SIGSYS","SIGQUIT","SIGIOT")}if(process.platform==="linux"){e.exports.push("SIGIO","SIGPOLL","SIGPWR","SIGSTKFLT","SIGUNUSED")}},728:function(e,t,n){e.exports=isexe;isexe.sync=sync;var r=n(747);function isexe(e,t,n){r.stat(e,function(e,r){n(e,e?false:checkStat(r,t))})}function sync(e,t){return checkStat(r.statSync(e),t)}function checkStat(e,t){return e.isFile()&&checkMode(e,t)}function checkMode(e,t){var n=e.mode;var r=e.uid;var o=e.gid;var s=t.uid!==undefined?t.uid:process.getuid&&process.getuid();var i=t.gid!==undefined?t.gid:process.getgid&&process.getgid();var c=parseInt("100",8);var a=parseInt("010",8);var u=parseInt("001",8);var d=c|a;var f=n&u||n&a&&o===i||n&c&&r===s||n&d&&s===0;return f}},746:function(e,t,n){"use strict";const r=n(129);const o=n(855);const s=n(101);function spawn(e,t,n){const i=o(e,t,n);const c=r.spawn(i.command,i.args,i.options);s.hookChildProcess(c,i);return c}function spawnSync(e,t,n){const i=o(e,t,n);const c=r.spawnSync(i.command,i.args,i.options);c.error=c.error||s.verifyENOENTSync(c.status,i);return c}e.exports=spawn;e.exports.spawn=spawn;e.exports.sync=spawnSync;e.exports._parse=o;e.exports._enoent=s},747:function(e){e.exports=require("fs")},766:function(e,t,n){"use strict";const{constants:r}=n(293);const o=n(341);const s=n(585);class MaxBufferError extends Error{constructor(){super("maxBuffer exceeded");this.name="MaxBufferError"}}async function getStream(e,t){if(!e){return Promise.reject(new Error("Expected a stream"))}t={maxBuffer:Infinity,...t};const{maxBuffer:n}=t;let i;await new Promise((c,a)=>{const u=e=>{if(e&&i.getBufferedLength()<=r.MAX_LENGTH){e.bufferedData=i.getBufferedValue()}a(e)};i=o(e,s(t),e=>{if(e){u(e);return}c()});i.on("data",()=>{if(i.getBufferedLength()>n){u(new MaxBufferError)}})});return i.getBufferedValue()}e.exports=getStream;e.exports.default=getStream;e.exports.buffer=((e,t)=>getStream(e,{...t,encoding:"buffer"}));e.exports.array=((e,t)=>getStream(e,{...t,array:true}));e.exports.MaxBufferError=MaxBufferError},779:function(e,t,n){"use strict";Object.defineProperty(t,"__esModule",{value:true});t.signalsByNumber=t.signalsByName=void 0;var r=n(87);var o=n(435);var s=n(295);const i=function(){const e=(0,o.getSignals)();return e.reduce(c,{})};const c=function(e,{name:t,number:n,description:r,supported:o,action:s,forced:i,standard:c}){return{...e,[t]:{name:t,number:n,description:r,supported:o,action:s,forced:i,standard:c}}};const a=i();t.signalsByName=a;const u=function(){const e=(0,o.getSignals)();const t=s.SIGRTMAX+1;const n=Array.from({length:t},(t,n)=>d(n,e));return Object.assign({},...n)};const d=function(e,t){const n=f(e,t);if(n===undefined){return{}}const{name:r,description:o,supported:s,action:i,forced:c,standard:a}=n;return{[e]:{name:r,number:e,description:o,supported:s,action:i,forced:c,standard:a}}};const f=function(e,t){const n=t.find(({name:t})=>r.constants.signals[t]===e);if(n!==undefined){return n}return t.find(t=>t.number===e)};const l=u();t.signalsByNumber=l},814:function(e){"use strict";const t=(async()=>{})().constructor.prototype;const n=["then","catch","finally"].map(e=>[e,Reflect.getOwnPropertyDescriptor(t,e)]);const r=(e,t)=>{for(const[r,o]of n){const n=typeof t==="function"?(...e)=>Reflect.apply(o.value,t(),e):o.value.bind(t);Reflect.defineProperty(e,r,{...o,value:n})}return e};const o=e=>{return new Promise((t,n)=>{e.on("exit",(e,n)=>{t({exitCode:e,signal:n})});e.on("error",e=>{n(e)});if(e.stdin){e.stdin.on("error",e=>{n(e)})}})};e.exports={mergePromise:r,getSpawnedPromise:o}},819:function(e,t,n){"use strict";const r=n(87);const o=n(931);const s=1e3*5;const i=(e,t="SIGTERM",n={})=>{const r=e(t);c(e,t,n,r);return r};const c=(e,t,n,r)=>{if(!a(t,n,r)){return}const o=d(n);const s=setTimeout(()=>{e("SIGKILL")},o);if(s.unref){s.unref()}};const a=(e,{forceKillAfterTimeout:t},n)=>{return u(e)&&t!==false&&n};const u=e=>{return e===r.constants.signals.SIGTERM||typeof e==="string"&&e.toUpperCase()==="SIGTERM"};const d=({forceKillAfterTimeout:e=true})=>{if(e===true){return s}if(!Number.isFinite(e)||e<0){throw new TypeError(`Expected the \`forceKillAfterTimeout\` option to be a non-negative integer, got \`${e}\` (${typeof e})`)}return e};const f=(e,t)=>{const n=e.kill();if(n){t.isCanceled=true}};const l=(e,t,n)=>{e.kill(t);n(Object.assign(new Error("Timed out"),{timedOut:true,signal:t}))};const p=(e,{timeout:t,killSignal:n="SIGTERM"},r)=>{if(t===0||t===undefined){return r}if(!Number.isFinite(t)||t<0){throw new TypeError(`Expected the \`timeout\` option to be a non-negative integer, got \`${t}\` (${typeof t})`)}let o;const s=new Promise((r,s)=>{o=setTimeout(()=>{l(e,n,s)},t)});const i=r.finally(()=>{clearTimeout(o)});return Promise.race([s,i])};const m=async(e,{cleanup:t,detached:n},r)=>{if(!t||n){return r}const s=o(()=>{e.kill()});return r.finally(()=>{s()})};e.exports={spawnedKill:i,spawnedCancel:f,setupTimeout:p,setExitHandler:m}},855:function(e,t,n){"use strict";const r=n(622);const o=n(274);const s=n(48);const i=n(252);const c=process.platform==="win32";const a=/\.(?:com|exe)$/i;const u=/node_modules[\\/].bin[\\/][^\\/]+\.cmd$/i;function detectShebang(e){e.file=o(e);const t=e.file&&i(e.file);if(t){e.args.unshift(e.file);e.command=t;return o(e)}return e.file}function parseNonShell(e){if(!c){return e}const t=detectShebang(e);const n=!a.test(t);if(e.options.forceShell||n){const n=u.test(t);e.command=r.normalize(e.command);e.command=s.command(e.command);e.args=e.args.map(e=>s.argument(e,n));const o=[e.command].concat(e.args).join(" ");e.args=["/d","/s","/c",`"${o}"`];e.command=process.env.comspec||"cmd.exe";e.options.windowsVerbatimArguments=true}return e}function parse(e,t,n){if(t&&!Array.isArray(t)){n=t;t=null}t=t?t.slice(0):[];n=Object.assign({},n);const r={command:e,args:t,options:n,file:undefined,original:{command:e,args:t}};return n.shell?r:parseNonShell(r)}e.exports=parse},931:function(e,t,n){var r=n(357);var o=n(710);var s=/^win/i.test(process.platform);var i=n(614);if(typeof i!=="function"){i=i.EventEmitter}var c;if(process.__signal_exit_emitter__){c=process.__signal_exit_emitter__}else{c=process.__signal_exit_emitter__=new i;c.count=0;c.emitted={}}if(!c.infinite){c.setMaxListeners(Infinity);c.infinite=true}e.exports=function(e,t){r.equal(typeof e,"function","a callback must be provided for exit handler");if(u===false){load()}var n="exit";if(t&&t.alwaysLast){n="afterexit"}var o=function(){c.removeListener(n,e);if(c.listeners("exit").length===0&&c.listeners("afterexit").length===0){unload()}};c.on(n,e);return o};e.exports.unload=unload;function unload(){if(!u){return}u=false;o.forEach(function(e){try{process.removeListener(e,a[e])}catch(e){}});process.emit=f;process.reallyExit=d;c.count-=1}function emit(e,t,n){if(c.emitted[e]){return}c.emitted[e]=true;c.emit(e,t,n)}var a={};o.forEach(function(e){a[e]=function listener(){var t=process.listeners(e);if(t.length===c.count){unload();emit("exit",null,e);emit("afterexit",null,e);if(s&&e==="SIGHUP"){e="SIGINT"}process.kill(process.pid,e)}}});e.exports.signals=function(){return o};e.exports.load=load;var u=false;function load(){if(u){return}u=true;c.count+=1;o=o.filter(function(e){try{process.on(e,a[e]);return true}catch(e){return false}});process.emit=processEmit;process.reallyExit=processReallyExit}var d=process.reallyExit;function processReallyExit(e){process.exitCode=e||0;emit("exit",process.exitCode,null);emit("afterexit",process.exitCode,null);d.call(process,process.exitCode)}var f=process.emit;function processEmit(e,t){if(e==="exit"){if(t!==undefined){process.exitCode=t}var n=f.apply(this,arguments);emit("exit",process.exitCode,null);emit("afterexit",process.exitCode,null);return n}else{return f.apply(this,arguments)}}},932:function(e,t,n){const r=n(447);e.exports=(async({github:e,context:t})=>{const{stdout:n}=await r("git",["log","--no-merges",`--pretty='format:"%h: %b"'`,`master..${t.payload.pull_request.head.ref}`]);const o=new Set;for(const e of n.match(/#([\d]+)/g)){o.add(e.split("#")[1])}console.log(o);const s=[];for(const n of o){const{data:r}=await e.issues.get({owner:t.repo.owner,repo:t.repo.repo,issue_number:n});if(!r.labels.some(e=>e.name==="development")){s.push(`- [X] ${r.title} #${r.number}`)}}return s.join("\r\n")})},940:function(e){e.exports=wrappy;function wrappy(e,t){if(e&&t)return wrappy(e)(t);if(typeof e!=="function")throw new TypeError("need wrapper function");Object.keys(e).forEach(function(t){wrapper[t]=e[t]});return wrapper;function wrapper(){var t=new Array(arguments.length);for(var n=0;n<t.length;n++){t[n]=arguments[n]}var r=e.apply(this,t);var o=t[t.length-1];if(typeof r==="function"&&r!==o){Object.keys(o).forEach(function(e){r[e]=o[e]})}return r}}}});
+module.exports =
+/******/ (function(modules, runtime) { // webpackBootstrap
+/******/ 	"use strict";
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		var threw = true;
+/******/ 		try {
+/******/ 			modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/ 			threw = false;
+/******/ 		} finally {
+/******/ 			if(threw) delete installedModules[moduleId];
+/******/ 		}
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	__webpack_require__.ab = __dirname + "/";
+/******/
+/******/ 	// the startup function
+/******/ 	function startup() {
+/******/ 		// Load entry module and return exports
+/******/ 		return __webpack_require__(932);
+/******/ 	};
+/******/
+/******/ 	// run startup
+/******/ 	return startup();
+/******/ })
+/************************************************************************/
+/******/ ({
+
+/***/ 1:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+module.exports = isexe
+isexe.sync = sync
+
+var fs = __webpack_require__(747)
+
+function checkPathExt (path, options) {
+  var pathext = options.pathExt !== undefined ?
+    options.pathExt : process.env.PATHEXT
+
+  if (!pathext) {
+    return true
+  }
+
+  pathext = pathext.split(';')
+  if (pathext.indexOf('') !== -1) {
+    return true
+  }
+  for (var i = 0; i < pathext.length; i++) {
+    var p = pathext[i].toLowerCase()
+    if (p && path.substr(-p.length).toLowerCase() === p) {
+      return true
+    }
+  }
+  return false
+}
+
+function checkStat (stat, path, options) {
+  if (!stat.isSymbolicLink() && !stat.isFile()) {
+    return false
+  }
+  return checkPathExt(path, options)
+}
+
+function isexe (path, options, cb) {
+  fs.stat(path, function (er, stat) {
+    cb(er, er ? false : checkStat(stat, path, options))
+  })
+}
+
+function sync (path, options) {
+  return checkStat(fs.statSync(path), path, options)
+}
+
+
+/***/ }),
+
+/***/ 32:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const shebangRegex = __webpack_require__(638);
+
+module.exports = (string = '') => {
+	const match = string.match(shebangRegex);
+
+	if (!match) {
+		return null;
+	}
+
+	const [path, argument] = match[0].replace(/#! ?/, '').split(' ');
+	const binary = path.split('/').pop();
+
+	if (binary === 'env') {
+		return argument;
+	}
+
+	return argument ? `${binary} ${argument}` : binary;
+};
+
+
+/***/ }),
+
+/***/ 47:
+/***/ (function(module) {
+
+"use strict";
+
+
+const mimicFn = (to, from) => {
+	for (const prop of Reflect.ownKeys(from)) {
+		Object.defineProperty(to, prop, Object.getOwnPropertyDescriptor(from, prop));
+	}
+
+	return to;
+};
+
+module.exports = mimicFn;
+// TODO: Remove this for the next major release
+module.exports.default = mimicFn;
+
+
+/***/ }),
+
+/***/ 48:
+/***/ (function(module) {
+
+"use strict";
+
+
+// See http://www.robvanderwoude.com/escapechars.php
+const metaCharsRegExp = /([()\][%!^"`<>&|;, *?])/g;
+
+function escapeCommand(arg) {
+    // Escape meta chars
+    arg = arg.replace(metaCharsRegExp, '^$1');
+
+    return arg;
+}
+
+function escapeArgument(arg, doubleEscapeMetaChars) {
+    // Convert to string
+    arg = `${arg}`;
+
+    // Algorithm below is based on https://qntm.org/cmd
+
+    // Sequence of backslashes followed by a double quote:
+    // double up all the backslashes and escape the double quote
+    arg = arg.replace(/(\\*)"/g, '$1$1\\"');
+
+    // Sequence of backslashes followed by the end of the string
+    // (which will become a double quote later):
+    // double up all the backslashes
+    arg = arg.replace(/(\\*)$/, '$1$1');
+
+    // All other backslashes occur literally
+
+    // Quote the whole thing:
+    arg = `"${arg}"`;
+
+    // Escape meta chars
+    arg = arg.replace(metaCharsRegExp, '^$1');
+
+    // Double escape meta chars if necessary
+    if (doubleEscapeMetaChars) {
+        arg = arg.replace(metaCharsRegExp, '^$1');
+    }
+
+    return arg;
+}
+
+module.exports.command = escapeCommand;
+module.exports.argument = escapeArgument;
+
+
+/***/ }),
+
+/***/ 82:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const mimicFn = __webpack_require__(47);
+
+const calledFunctions = new WeakMap();
+
+const onetime = (function_, options = {}) => {
+	if (typeof function_ !== 'function') {
+		throw new TypeError('Expected a function');
+	}
+
+	let returnValue;
+	let callCount = 0;
+	const functionName = function_.displayName || function_.name || '<anonymous>';
+
+	const onetime = function (...arguments_) {
+		calledFunctions.set(onetime, ++callCount);
+
+		if (callCount === 1) {
+			returnValue = function_.apply(this, arguments_);
+			function_ = null;
+		} else if (options.throw === true) {
+			throw new Error(`Function \`${functionName}\` can only be called once`);
+		}
+
+		return returnValue;
+	};
+
+	mimicFn(onetime, function_);
+	calledFunctions.set(onetime, callCount);
+
+	return onetime;
+};
+
+module.exports = onetime;
+// TODO: Remove this for the next major release
+module.exports.default = onetime;
+
+module.exports.callCount = function_ => {
+	if (!calledFunctions.has(function_)) {
+		throw new Error(`The given function \`${function_.name}\` is not wrapped by the \`onetime\` package`);
+	}
+
+	return calledFunctions.get(function_);
+};
+
+
+/***/ }),
+
+/***/ 87:
+/***/ (function(module) {
+
+module.exports = require("os");
+
+/***/ }),
+
+/***/ 101:
+/***/ (function(module) {
+
+"use strict";
+
+
+const isWin = process.platform === 'win32';
+
+function notFoundError(original, syscall) {
+    return Object.assign(new Error(`${syscall} ${original.command} ENOENT`), {
+        code: 'ENOENT',
+        errno: 'ENOENT',
+        syscall: `${syscall} ${original.command}`,
+        path: original.command,
+        spawnargs: original.args,
+    });
+}
+
+function hookChildProcess(cp, parsed) {
+    if (!isWin) {
+        return;
+    }
+
+    const originalEmit = cp.emit;
+
+    cp.emit = function (name, arg1) {
+        // If emitting "exit" event and exit code is 1, we need to check if
+        // the command exists and emit an "error" instead
+        // See https://github.com/IndigoUnited/node-cross-spawn/issues/16
+        if (name === 'exit') {
+            const err = verifyENOENT(arg1, parsed, 'spawn');
+
+            if (err) {
+                return originalEmit.call(cp, 'error', err);
+            }
+        }
+
+        return originalEmit.apply(cp, arguments); // eslint-disable-line prefer-rest-params
+    };
+}
+
+function verifyENOENT(status, parsed) {
+    if (isWin && status === 1 && !parsed.file) {
+        return notFoundError(parsed.original, 'spawn');
+    }
+
+    return null;
+}
+
+function verifyENOENTSync(status, parsed) {
+    if (isWin && status === 1 && !parsed.file) {
+        return notFoundError(parsed.original, 'spawnSync');
+    }
+
+    return null;
+}
+
+module.exports = {
+    hookChildProcess,
+    verifyENOENT,
+    verifyENOENTSync,
+    notFoundError,
+};
+
+
+/***/ }),
+
+/***/ 126:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var fs = __webpack_require__(747)
+var core
+if (process.platform === 'win32' || global.TESTING_WINDOWS) {
+  core = __webpack_require__(1)
+} else {
+  core = __webpack_require__(728)
+}
+
+module.exports = isexe
+isexe.sync = sync
+
+function isexe (path, options, cb) {
+  if (typeof options === 'function') {
+    cb = options
+    options = {}
+  }
+
+  if (!cb) {
+    if (typeof Promise !== 'function') {
+      throw new TypeError('callback not provided')
+    }
+
+    return new Promise(function (resolve, reject) {
+      isexe(path, options || {}, function (er, is) {
+        if (er) {
+          reject(er)
+        } else {
+          resolve(is)
+        }
+      })
+    })
+  }
+
+  core(path, options || {}, function (er, is) {
+    // ignore EACCES because that just means we aren't allowed to run it
+    if (er) {
+      if (er.code === 'EACCES' || options && options.ignoreErrors) {
+        er = null
+        is = false
+      }
+    }
+    cb(er, is)
+  })
+}
+
+function sync (path, options) {
+  // my kingdom for a filtered catch
+  try {
+    return core.sync(path, options || {})
+  } catch (er) {
+    if (options && options.ignoreErrors || er.code === 'EACCES') {
+      return false
+    } else {
+      throw er
+    }
+  }
+}
+
+
+/***/ }),
+
+/***/ 129:
+/***/ (function(module) {
+
+module.exports = require("child_process");
+
+/***/ }),
+
+/***/ 166:
+/***/ (function(module) {
+
+"use strict";
+
+const aliases = ['stdin', 'stdout', 'stderr'];
+
+const hasAlias = opts => aliases.some(alias => opts[alias] !== undefined);
+
+const normalizeStdio = opts => {
+	if (!opts) {
+		return;
+	}
+
+	const {stdio} = opts;
+
+	if (stdio === undefined) {
+		return aliases.map(alias => opts[alias]);
+	}
+
+	if (hasAlias(opts)) {
+		throw new Error(`It's not possible to provide \`stdio\` in combination with one of ${aliases.map(alias => `\`${alias}\``).join(', ')}`);
+	}
+
+	if (typeof stdio === 'string') {
+		return stdio;
+	}
+
+	if (!Array.isArray(stdio)) {
+		throw new TypeError(`Expected \`stdio\` to be of type \`string\` or \`Array\`, got \`${typeof stdio}\``);
+	}
+
+	const length = Math.max(stdio.length, aliases.length);
+	return Array.from({length}, (value, index) => stdio[index]);
+};
+
+module.exports = normalizeStdio;
+
+// `ipc` is pushed unless it is already present
+module.exports.node = opts => {
+	const stdio = normalizeStdio(opts);
+
+	if (stdio === 'ipc') {
+		return 'ipc';
+	}
+
+	if (stdio === undefined || typeof stdio === 'string') {
+		return [stdio, stdio, stdio, 'ipc'];
+	}
+
+	if (stdio.includes('ipc')) {
+		return stdio;
+	}
+
+	return [...stdio, 'ipc'];
+};
+
+
+/***/ }),
+
+/***/ 174:
+/***/ (function(module) {
+
+"use strict";
+
+
+module.exports = input => {
+	const LF = typeof input === 'string' ? '\n' : '\n'.charCodeAt();
+	const CR = typeof input === 'string' ? '\r' : '\r'.charCodeAt();
+
+	if (input[input.length - 1] === LF) {
+		input = input.slice(0, input.length - 1);
+	}
+
+	if (input[input.length - 1] === CR) {
+		input = input.slice(0, input.length - 1);
+	}
+
+	return input;
+};
+
+
+/***/ }),
+
+/***/ 187:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const {signalsByName} = __webpack_require__(779);
+
+const getErrorPrefix = ({timedOut, timeout, errorCode, signal, signalDescription, exitCode, isCanceled}) => {
+	if (timedOut) {
+		return `timed out after ${timeout} milliseconds`;
+	}
+
+	if (isCanceled) {
+		return 'was canceled';
+	}
+
+	if (errorCode !== undefined) {
+		return `failed with ${errorCode}`;
+	}
+
+	if (signal !== undefined) {
+		return `was killed with ${signal} (${signalDescription})`;
+	}
+
+	if (exitCode !== undefined) {
+		return `failed with exit code ${exitCode}`;
+	}
+
+	return 'failed';
+};
+
+const makeError = ({
+	stdout,
+	stderr,
+	all,
+	error,
+	signal,
+	exitCode,
+	command,
+	timedOut,
+	isCanceled,
+	killed,
+	parsed: {options: {timeout}}
+}) => {
+	// `signal` and `exitCode` emitted on `spawned.on('exit')` event can be `null`.
+	// We normalize them to `undefined`
+	exitCode = exitCode === null ? undefined : exitCode;
+	signal = signal === null ? undefined : signal;
+	const signalDescription = signal === undefined ? undefined : signalsByName[signal].description;
+
+	const errorCode = error && error.code;
+
+	const prefix = getErrorPrefix({timedOut, timeout, errorCode, signal, signalDescription, exitCode, isCanceled});
+	const execaMessage = `Command ${prefix}: ${command}`;
+	const isError = Object.prototype.toString.call(error) === '[object Error]';
+	const shortMessage = isError ? `${execaMessage}\n${error.message}` : execaMessage;
+	const message = [shortMessage, stderr, stdout].filter(Boolean).join('\n');
+
+	if (isError) {
+		error.originalMessage = error.message;
+		error.message = message;
+	} else {
+		error = new Error(message);
+	}
+
+	error.shortMessage = shortMessage;
+	error.command = command;
+	error.exitCode = exitCode;
+	error.signal = signal;
+	error.signalDescription = signalDescription;
+	error.stdout = stdout;
+	error.stderr = stderr;
+
+	if (all !== undefined) {
+		error.all = all;
+	}
+
+	if ('bufferedData' in error) {
+		delete error.bufferedData;
+	}
+
+	error.failed = true;
+	error.timedOut = Boolean(timedOut);
+	error.isCanceled = isCanceled;
+	error.killed = killed && !timedOut;
+
+	return error;
+};
+
+module.exports = makeError;
+
+
+/***/ }),
+
+/***/ 205:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var once = __webpack_require__(223);
+
+var noop = function() {};
+
+var isRequest = function(stream) {
+	return stream.setHeader && typeof stream.abort === 'function';
+};
+
+var isChildProcess = function(stream) {
+	return stream.stdio && Array.isArray(stream.stdio) && stream.stdio.length === 3
+};
+
+var eos = function(stream, opts, callback) {
+	if (typeof opts === 'function') return eos(stream, null, opts);
+	if (!opts) opts = {};
+
+	callback = once(callback || noop);
+
+	var ws = stream._writableState;
+	var rs = stream._readableState;
+	var readable = opts.readable || (opts.readable !== false && stream.readable);
+	var writable = opts.writable || (opts.writable !== false && stream.writable);
+	var cancelled = false;
+
+	var onlegacyfinish = function() {
+		if (!stream.writable) onfinish();
+	};
+
+	var onfinish = function() {
+		writable = false;
+		if (!readable) callback.call(stream);
+	};
+
+	var onend = function() {
+		readable = false;
+		if (!writable) callback.call(stream);
+	};
+
+	var onexit = function(exitCode) {
+		callback.call(stream, exitCode ? new Error('exited with error code: ' + exitCode) : null);
+	};
+
+	var onerror = function(err) {
+		callback.call(stream, err);
+	};
+
+	var onclose = function() {
+		process.nextTick(onclosenexttick);
+	};
+
+	var onclosenexttick = function() {
+		if (cancelled) return;
+		if (readable && !(rs && (rs.ended && !rs.destroyed))) return callback.call(stream, new Error('premature close'));
+		if (writable && !(ws && (ws.ended && !ws.destroyed))) return callback.call(stream, new Error('premature close'));
+	};
+
+	var onrequest = function() {
+		stream.req.on('finish', onfinish);
+	};
+
+	if (isRequest(stream)) {
+		stream.on('complete', onfinish);
+		stream.on('abort', onclose);
+		if (stream.req) onrequest();
+		else stream.on('request', onrequest);
+	} else if (writable && !ws) { // legacy streams
+		stream.on('end', onlegacyfinish);
+		stream.on('close', onlegacyfinish);
+	}
+
+	if (isChildProcess(stream)) stream.on('exit', onexit);
+
+	stream.on('end', onend);
+	stream.on('finish', onfinish);
+	if (opts.error !== false) stream.on('error', onerror);
+	stream.on('close', onclose);
+
+	return function() {
+		cancelled = true;
+		stream.removeListener('complete', onfinish);
+		stream.removeListener('abort', onclose);
+		stream.removeListener('request', onrequest);
+		if (stream.req) stream.req.removeListener('finish', onfinish);
+		stream.removeListener('end', onlegacyfinish);
+		stream.removeListener('close', onlegacyfinish);
+		stream.removeListener('finish', onfinish);
+		stream.removeListener('exit', onexit);
+		stream.removeListener('end', onend);
+		stream.removeListener('error', onerror);
+		stream.removeListener('close', onclose);
+	};
+};
+
+module.exports = eos;
+
+
+/***/ }),
+
+/***/ 207:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const isWindows = process.platform === 'win32' ||
+    process.env.OSTYPE === 'cygwin' ||
+    process.env.OSTYPE === 'msys'
+
+const path = __webpack_require__(622)
+const COLON = isWindows ? ';' : ':'
+const isexe = __webpack_require__(126)
+
+const getNotFoundError = (cmd) =>
+  Object.assign(new Error(`not found: ${cmd}`), { code: 'ENOENT' })
+
+const getPathInfo = (cmd, opt) => {
+  const colon = opt.colon || COLON
+
+  // If it has a slash, then we don't bother searching the pathenv.
+  // just check the file itself, and that's it.
+  const pathEnv = cmd.match(/\//) || isWindows && cmd.match(/\\/) ? ['']
+    : (
+      [
+        // windows always checks the cwd first
+        ...(isWindows ? [process.cwd()] : []),
+        ...(opt.path || process.env.PATH ||
+          /* istanbul ignore next: very unusual */ '').split(colon),
+      ]
+    )
+  const pathExtExe = isWindows
+    ? opt.pathExt || process.env.PATHEXT || '.EXE;.CMD;.BAT;.COM'
+    : ''
+  const pathExt = isWindows ? pathExtExe.split(colon) : ['']
+
+  if (isWindows) {
+    if (cmd.indexOf('.') !== -1 && pathExt[0] !== '')
+      pathExt.unshift('')
+  }
+
+  return {
+    pathEnv,
+    pathExt,
+    pathExtExe,
+  }
+}
+
+const which = (cmd, opt, cb) => {
+  if (typeof opt === 'function') {
+    cb = opt
+    opt = {}
+  }
+  if (!opt)
+    opt = {}
+
+  const { pathEnv, pathExt, pathExtExe } = getPathInfo(cmd, opt)
+  const found = []
+
+  const step = i => new Promise((resolve, reject) => {
+    if (i === pathEnv.length)
+      return opt.all && found.length ? resolve(found)
+        : reject(getNotFoundError(cmd))
+
+    const ppRaw = pathEnv[i]
+    const pathPart = /^".*"$/.test(ppRaw) ? ppRaw.slice(1, -1) : ppRaw
+
+    const pCmd = path.join(pathPart, cmd)
+    const p = !pathPart && /^\.[\\\/]/.test(cmd) ? cmd.slice(0, 2) + pCmd
+      : pCmd
+
+    resolve(subStep(p, i, 0))
+  })
+
+  const subStep = (p, i, ii) => new Promise((resolve, reject) => {
+    if (ii === pathExt.length)
+      return resolve(step(i + 1))
+    const ext = pathExt[ii]
+    isexe(p + ext, { pathExt: pathExtExe }, (er, is) => {
+      if (!er && is) {
+        if (opt.all)
+          found.push(p + ext)
+        else
+          return resolve(p + ext)
+      }
+      return resolve(subStep(p, i, ii + 1))
+    })
+  })
+
+  return cb ? step(0).then(res => cb(null, res), cb) : step(0)
+}
+
+const whichSync = (cmd, opt) => {
+  opt = opt || {}
+
+  const { pathEnv, pathExt, pathExtExe } = getPathInfo(cmd, opt)
+  const found = []
+
+  for (let i = 0; i < pathEnv.length; i ++) {
+    const ppRaw = pathEnv[i]
+    const pathPart = /^".*"$/.test(ppRaw) ? ppRaw.slice(1, -1) : ppRaw
+
+    const pCmd = path.join(pathPart, cmd)
+    const p = !pathPart && /^\.[\\\/]/.test(cmd) ? cmd.slice(0, 2) + pCmd
+      : pCmd
+
+    for (let j = 0; j < pathExt.length; j ++) {
+      const cur = p + pathExt[j]
+      try {
+        const is = isexe.sync(cur, { pathExt: pathExtExe })
+        if (is) {
+          if (opt.all)
+            found.push(cur)
+          else
+            return cur
+        }
+      } catch (ex) {}
+    }
+  }
+
+  if (opt.all && found.length)
+    return found
+
+  if (opt.nothrow)
+    return null
+
+  throw getNotFoundError(cmd)
+}
+
+module.exports = which
+which.sync = whichSync
+
+
+/***/ }),
+
+/***/ 213:
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+Object.defineProperty(exports,"__esModule",{value:true});exports.SIGNALS=void 0;
+
+const SIGNALS=[
+{
+name:"SIGHUP",
+number:1,
+action:"terminate",
+description:"Terminal closed",
+standard:"posix"},
+
+{
+name:"SIGINT",
+number:2,
+action:"terminate",
+description:"User interruption with CTRL-C",
+standard:"ansi"},
+
+{
+name:"SIGQUIT",
+number:3,
+action:"core",
+description:"User interruption with CTRL-\\",
+standard:"posix"},
+
+{
+name:"SIGILL",
+number:4,
+action:"core",
+description:"Invalid machine instruction",
+standard:"ansi"},
+
+{
+name:"SIGTRAP",
+number:5,
+action:"core",
+description:"Debugger breakpoint",
+standard:"posix"},
+
+{
+name:"SIGABRT",
+number:6,
+action:"core",
+description:"Aborted",
+standard:"ansi"},
+
+{
+name:"SIGIOT",
+number:6,
+action:"core",
+description:"Aborted",
+standard:"bsd"},
+
+{
+name:"SIGBUS",
+number:7,
+action:"core",
+description:
+"Bus error due to misaligned, non-existing address or paging error",
+standard:"bsd"},
+
+{
+name:"SIGEMT",
+number:7,
+action:"terminate",
+description:"Command should be emulated but is not implemented",
+standard:"other"},
+
+{
+name:"SIGFPE",
+number:8,
+action:"core",
+description:"Floating point arithmetic error",
+standard:"ansi"},
+
+{
+name:"SIGKILL",
+number:9,
+action:"terminate",
+description:"Forced termination",
+standard:"posix",
+forced:true},
+
+{
+name:"SIGUSR1",
+number:10,
+action:"terminate",
+description:"Application-specific signal",
+standard:"posix"},
+
+{
+name:"SIGSEGV",
+number:11,
+action:"core",
+description:"Segmentation fault",
+standard:"ansi"},
+
+{
+name:"SIGUSR2",
+number:12,
+action:"terminate",
+description:"Application-specific signal",
+standard:"posix"},
+
+{
+name:"SIGPIPE",
+number:13,
+action:"terminate",
+description:"Broken pipe or socket",
+standard:"posix"},
+
+{
+name:"SIGALRM",
+number:14,
+action:"terminate",
+description:"Timeout or timer",
+standard:"posix"},
+
+{
+name:"SIGTERM",
+number:15,
+action:"terminate",
+description:"Termination",
+standard:"ansi"},
+
+{
+name:"SIGSTKFLT",
+number:16,
+action:"terminate",
+description:"Stack is empty or overflowed",
+standard:"other"},
+
+{
+name:"SIGCHLD",
+number:17,
+action:"ignore",
+description:"Child process terminated, paused or unpaused",
+standard:"posix"},
+
+{
+name:"SIGCLD",
+number:17,
+action:"ignore",
+description:"Child process terminated, paused or unpaused",
+standard:"other"},
+
+{
+name:"SIGCONT",
+number:18,
+action:"unpause",
+description:"Unpaused",
+standard:"posix",
+forced:true},
+
+{
+name:"SIGSTOP",
+number:19,
+action:"pause",
+description:"Paused",
+standard:"posix",
+forced:true},
+
+{
+name:"SIGTSTP",
+number:20,
+action:"pause",
+description:"Paused using CTRL-Z or \"suspend\"",
+standard:"posix"},
+
+{
+name:"SIGTTIN",
+number:21,
+action:"pause",
+description:"Background process cannot read terminal input",
+standard:"posix"},
+
+{
+name:"SIGBREAK",
+number:21,
+action:"terminate",
+description:"User interruption with CTRL-BREAK",
+standard:"other"},
+
+{
+name:"SIGTTOU",
+number:22,
+action:"pause",
+description:"Background process cannot write to terminal output",
+standard:"posix"},
+
+{
+name:"SIGURG",
+number:23,
+action:"ignore",
+description:"Socket received out-of-band data",
+standard:"bsd"},
+
+{
+name:"SIGXCPU",
+number:24,
+action:"core",
+description:"Process timed out",
+standard:"bsd"},
+
+{
+name:"SIGXFSZ",
+number:25,
+action:"core",
+description:"File too big",
+standard:"bsd"},
+
+{
+name:"SIGVTALRM",
+number:26,
+action:"terminate",
+description:"Timeout or timer",
+standard:"bsd"},
+
+{
+name:"SIGPROF",
+number:27,
+action:"terminate",
+description:"Timeout or timer",
+standard:"bsd"},
+
+{
+name:"SIGWINCH",
+number:28,
+action:"ignore",
+description:"Terminal window size changed",
+standard:"bsd"},
+
+{
+name:"SIGIO",
+number:29,
+action:"terminate",
+description:"I/O is available",
+standard:"other"},
+
+{
+name:"SIGPOLL",
+number:29,
+action:"terminate",
+description:"Watched event",
+standard:"other"},
+
+{
+name:"SIGINFO",
+number:29,
+action:"ignore",
+description:"Request for process information",
+standard:"other"},
+
+{
+name:"SIGPWR",
+number:30,
+action:"terminate",
+description:"Device running out of power",
+standard:"systemv"},
+
+{
+name:"SIGSYS",
+number:31,
+action:"core",
+description:"Invalid system call",
+standard:"other"},
+
+{
+name:"SIGUNUSED",
+number:31,
+action:"terminate",
+description:"Invalid system call",
+standard:"other"}];exports.SIGNALS=SIGNALS;
+//# sourceMappingURL=core.js.map
+
+/***/ }),
+
+/***/ 223:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var wrappy = __webpack_require__(940)
+module.exports = wrappy(once)
+module.exports.strict = wrappy(onceStrict)
+
+once.proto = once(function () {
+  Object.defineProperty(Function.prototype, 'once', {
+    value: function () {
+      return once(this)
+    },
+    configurable: true
+  })
+
+  Object.defineProperty(Function.prototype, 'onceStrict', {
+    value: function () {
+      return onceStrict(this)
+    },
+    configurable: true
+  })
+})
+
+function once (fn) {
+  var f = function () {
+    if (f.called) return f.value
+    f.called = true
+    return f.value = fn.apply(this, arguments)
+  }
+  f.called = false
+  return f
+}
+
+function onceStrict (fn) {
+  var f = function () {
+    if (f.called)
+      throw new Error(f.onceError)
+    f.called = true
+    return f.value = fn.apply(this, arguments)
+  }
+  var name = fn.name || 'Function wrapped with `once`'
+  f.onceError = name + " shouldn't be called more than once"
+  f.called = false
+  return f
+}
+
+
+/***/ }),
+
+/***/ 252:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+
+const fs = __webpack_require__(747);
+const shebangCommand = __webpack_require__(32);
+
+function readShebang(command) {
+    // Read the first 150 bytes from the file
+    const size = 150;
+    const buffer = Buffer.alloc(size);
+
+    let fd;
+
+    try {
+        fd = fs.openSync(command, 'r');
+        fs.readSync(fd, buffer, 0, size, 0);
+        fs.closeSync(fd);
+    } catch (e) { /* Empty */ }
+
+    // Attempt to extract shebang (null is returned if not a shebang)
+    return shebangCommand(buffer.toString());
+}
+
+module.exports = readShebang;
+
+
+/***/ }),
+
+/***/ 274:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+
+const path = __webpack_require__(622);
+const which = __webpack_require__(207);
+const getPathKey = __webpack_require__(539);
+
+function resolveCommandAttempt(parsed, withoutPathExt) {
+    const env = parsed.options.env || process.env;
+    const cwd = process.cwd();
+    const hasCustomCwd = parsed.options.cwd != null;
+    // Worker threads do not have process.chdir()
+    const shouldSwitchCwd = hasCustomCwd && process.chdir !== undefined && !process.chdir.disabled;
+
+    // If a custom `cwd` was specified, we need to change the process cwd
+    // because `which` will do stat calls but does not support a custom cwd
+    if (shouldSwitchCwd) {
+        try {
+            process.chdir(parsed.options.cwd);
+        } catch (err) {
+            /* Empty */
+        }
+    }
+
+    let resolved;
+
+    try {
+        resolved = which.sync(parsed.command, {
+            path: env[getPathKey({ env })],
+            pathExt: withoutPathExt ? path.delimiter : undefined,
+        });
+    } catch (e) {
+        /* Empty */
+    } finally {
+        if (shouldSwitchCwd) {
+            process.chdir(cwd);
+        }
+    }
+
+    // If we successfully resolved, ensure that an absolute path is returned
+    // Note that when a custom `cwd` was used, we need to resolve to an absolute path based on it
+    if (resolved) {
+        resolved = path.resolve(hasCustomCwd ? parsed.options.cwd : '', resolved);
+    }
+
+    return resolved;
+}
+
+function resolveCommand(parsed) {
+    return resolveCommandAttempt(parsed) || resolveCommandAttempt(parsed, true);
+}
+
+module.exports = resolveCommand;
+
+
+/***/ }),
+
+/***/ 286:
+/***/ (function(module) {
+
+"use strict";
+
+const SPACES_REGEXP = / +/g;
+
+const joinCommand = (file, args = []) => {
+	if (!Array.isArray(args)) {
+		return file;
+	}
+
+	return [file, ...args].join(' ');
+};
+
+// Allow spaces to be escaped by a backslash if not meant as a delimiter
+const handleEscaping = (tokens, token, index) => {
+	if (index === 0) {
+		return [token];
+	}
+
+	const previousToken = tokens[tokens.length - 1];
+
+	if (previousToken.endsWith('\\')) {
+		return [...tokens.slice(0, -1), `${previousToken.slice(0, -1)} ${token}`];
+	}
+
+	return [...tokens, token];
+};
+
+// Handle `execa.command()`
+const parseCommand = command => {
+	return command
+		.trim()
+		.split(SPACES_REGEXP)
+		.reduce(handleEscaping, []);
+};
+
+module.exports = {
+	joinCommand,
+	parseCommand
+};
+
+
+/***/ }),
+
+/***/ 293:
+/***/ (function(module) {
+
+module.exports = require("buffer");
+
+/***/ }),
+
+/***/ 295:
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+Object.defineProperty(exports,"__esModule",{value:true});exports.SIGRTMAX=exports.getRealtimeSignals=void 0;
+const getRealtimeSignals=function(){
+const length=SIGRTMAX-SIGRTMIN+1;
+return Array.from({length},getRealtimeSignal);
+};exports.getRealtimeSignals=getRealtimeSignals;
+
+const getRealtimeSignal=function(value,index){
+return{
+name:`SIGRT${index+1}`,
+number:SIGRTMIN+index,
+action:"terminate",
+description:"Application-specific signal (realtime)",
+standard:"posix"};
+
+};
+
+const SIGRTMIN=34;
+const SIGRTMAX=64;exports.SIGRTMAX=SIGRTMAX;
+//# sourceMappingURL=realtime.js.map
+
+/***/ }),
+
+/***/ 341:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var once = __webpack_require__(223)
+var eos = __webpack_require__(205)
+var fs = __webpack_require__(747) // we only need fs to get the ReadStream and WriteStream prototypes
+
+var noop = function () {}
+var ancient = /^v?\.0/.test(process.version)
+
+var isFn = function (fn) {
+  return typeof fn === 'function'
+}
+
+var isFS = function (stream) {
+  if (!ancient) return false // newer node version do not need to care about fs is a special way
+  if (!fs) return false // browser
+  return (stream instanceof (fs.ReadStream || noop) || stream instanceof (fs.WriteStream || noop)) && isFn(stream.close)
+}
+
+var isRequest = function (stream) {
+  return stream.setHeader && isFn(stream.abort)
+}
+
+var destroyer = function (stream, reading, writing, callback) {
+  callback = once(callback)
+
+  var closed = false
+  stream.on('close', function () {
+    closed = true
+  })
+
+  eos(stream, {readable: reading, writable: writing}, function (err) {
+    if (err) return callback(err)
+    closed = true
+    callback()
+  })
+
+  var destroyed = false
+  return function (err) {
+    if (closed) return
+    if (destroyed) return
+    destroyed = true
+
+    if (isFS(stream)) return stream.close(noop) // use close for fs streams to avoid fd leaks
+    if (isRequest(stream)) return stream.abort() // request.destroy just do .end - .abort is what we want
+
+    if (isFn(stream.destroy)) return stream.destroy()
+
+    callback(err || new Error('stream was destroyed'))
+  }
+}
+
+var call = function (fn) {
+  fn()
+}
+
+var pipe = function (from, to) {
+  return from.pipe(to)
+}
+
+var pump = function () {
+  var streams = Array.prototype.slice.call(arguments)
+  var callback = isFn(streams[streams.length - 1] || noop) && streams.pop() || noop
+
+  if (Array.isArray(streams[0])) streams = streams[0]
+  if (streams.length < 2) throw new Error('pump requires two streams per minimum')
+
+  var error
+  var destroys = streams.map(function (stream, i) {
+    var reading = i < streams.length - 1
+    var writing = i > 0
+    return destroyer(stream, reading, writing, function (err) {
+      if (!error) error = err
+      if (err) destroys.forEach(call)
+      if (reading) return
+      destroys.forEach(call)
+      callback(error)
+    })
+  })
+
+  return streams.reduce(pipe)
+}
+
+module.exports = pump
+
+
+/***/ }),
+
+/***/ 357:
+/***/ (function(module) {
+
+module.exports = require("assert");
+
+/***/ }),
+
+/***/ 413:
+/***/ (function(module) {
+
+module.exports = require("stream");
+
+/***/ }),
+
+/***/ 435:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(exports,"__esModule",{value:true});exports.getSignals=void 0;var _os=__webpack_require__(87);
+
+var _core=__webpack_require__(213);
+var _realtime=__webpack_require__(295);
+
+
+
+const getSignals=function(){
+const realtimeSignals=(0,_realtime.getRealtimeSignals)();
+const signals=[..._core.SIGNALS,...realtimeSignals].map(normalizeSignal);
+return signals;
+};exports.getSignals=getSignals;
+
+
+
+
+
+
+
+const normalizeSignal=function({
+name,
+number:defaultNumber,
+description,
+action,
+forced=false,
+standard})
+{
+const{
+signals:{[name]:constantSignal}}=
+_os.constants;
+const supported=constantSignal!==undefined;
+const number=supported?constantSignal:defaultNumber;
+return{name,number,description,supported,action,forced,standard};
+};
+//# sourceMappingURL=signals.js.map
+
+/***/ }),
+
+/***/ 447:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const path = __webpack_require__(622);
+const childProcess = __webpack_require__(129);
+const crossSpawn = __webpack_require__(746);
+const stripFinalNewline = __webpack_require__(174);
+const npmRunPath = __webpack_require__(502);
+const onetime = __webpack_require__(82);
+const makeError = __webpack_require__(187);
+const normalizeStdio = __webpack_require__(166);
+const {spawnedKill, spawnedCancel, setupTimeout, setExitHandler} = __webpack_require__(819);
+const {handleInput, getSpawnedResult, makeAllStream, validateInputSync} = __webpack_require__(592);
+const {mergePromise, getSpawnedPromise} = __webpack_require__(814);
+const {joinCommand, parseCommand} = __webpack_require__(286);
+
+const DEFAULT_MAX_BUFFER = 1000 * 1000 * 100;
+
+const getEnv = ({env: envOption, extendEnv, preferLocal, localDir, execPath}) => {
+	const env = extendEnv ? {...process.env, ...envOption} : envOption;
+
+	if (preferLocal) {
+		return npmRunPath.env({env, cwd: localDir, execPath});
+	}
+
+	return env;
+};
+
+const handleArguments = (file, args, options = {}) => {
+	const parsed = crossSpawn._parse(file, args, options);
+	file = parsed.command;
+	args = parsed.args;
+	options = parsed.options;
+
+	options = {
+		maxBuffer: DEFAULT_MAX_BUFFER,
+		buffer: true,
+		stripFinalNewline: true,
+		extendEnv: true,
+		preferLocal: false,
+		localDir: options.cwd || process.cwd(),
+		execPath: process.execPath,
+		encoding: 'utf8',
+		reject: true,
+		cleanup: true,
+		all: false,
+		windowsHide: true,
+		...options
+	};
+
+	options.env = getEnv(options);
+
+	options.stdio = normalizeStdio(options);
+
+	if (process.platform === 'win32' && path.basename(file, '.exe') === 'cmd') {
+		// #116
+		args.unshift('/q');
+	}
+
+	return {file, args, options, parsed};
+};
+
+const handleOutput = (options, value, error) => {
+	if (typeof value !== 'string' && !Buffer.isBuffer(value)) {
+		// When `execa.sync()` errors, we normalize it to '' to mimic `execa()`
+		return error === undefined ? undefined : '';
+	}
+
+	if (options.stripFinalNewline) {
+		return stripFinalNewline(value);
+	}
+
+	return value;
+};
+
+const execa = (file, args, options) => {
+	const parsed = handleArguments(file, args, options);
+	const command = joinCommand(file, args);
+
+	let spawned;
+	try {
+		spawned = childProcess.spawn(parsed.file, parsed.args, parsed.options);
+	} catch (error) {
+		// Ensure the returned error is always both a promise and a child process
+		const dummySpawned = new childProcess.ChildProcess();
+		const errorPromise = Promise.reject(makeError({
+			error,
+			stdout: '',
+			stderr: '',
+			all: '',
+			command,
+			parsed,
+			timedOut: false,
+			isCanceled: false,
+			killed: false
+		}));
+		return mergePromise(dummySpawned, errorPromise);
+	}
+
+	const spawnedPromise = getSpawnedPromise(spawned);
+	const timedPromise = setupTimeout(spawned, parsed.options, spawnedPromise);
+	const processDone = setExitHandler(spawned, parsed.options, timedPromise);
+
+	const context = {isCanceled: false};
+
+	spawned.kill = spawnedKill.bind(null, spawned.kill.bind(spawned));
+	spawned.cancel = spawnedCancel.bind(null, spawned, context);
+
+	const handlePromise = async () => {
+		const [{error, exitCode, signal, timedOut}, stdoutResult, stderrResult, allResult] = await getSpawnedResult(spawned, parsed.options, processDone);
+		const stdout = handleOutput(parsed.options, stdoutResult);
+		const stderr = handleOutput(parsed.options, stderrResult);
+		const all = handleOutput(parsed.options, allResult);
+
+		if (error || exitCode !== 0 || signal !== null) {
+			const returnedError = makeError({
+				error,
+				exitCode,
+				signal,
+				stdout,
+				stderr,
+				all,
+				command,
+				parsed,
+				timedOut,
+				isCanceled: context.isCanceled,
+				killed: spawned.killed
+			});
+
+			if (!parsed.options.reject) {
+				return returnedError;
+			}
+
+			throw returnedError;
+		}
+
+		return {
+			command,
+			exitCode: 0,
+			stdout,
+			stderr,
+			all,
+			failed: false,
+			timedOut: false,
+			isCanceled: false,
+			killed: false
+		};
+	};
+
+	const handlePromiseOnce = onetime(handlePromise);
+
+	crossSpawn._enoent.hookChildProcess(spawned, parsed.parsed);
+
+	handleInput(spawned, parsed.options.input);
+
+	spawned.all = makeAllStream(spawned, parsed.options);
+
+	return mergePromise(spawned, handlePromiseOnce);
+};
+
+module.exports = execa;
+
+module.exports.sync = (file, args, options) => {
+	const parsed = handleArguments(file, args, options);
+	const command = joinCommand(file, args);
+
+	validateInputSync(parsed.options);
+
+	let result;
+	try {
+		result = childProcess.spawnSync(parsed.file, parsed.args, parsed.options);
+	} catch (error) {
+		throw makeError({
+			error,
+			stdout: '',
+			stderr: '',
+			all: '',
+			command,
+			parsed,
+			timedOut: false,
+			isCanceled: false,
+			killed: false
+		});
+	}
+
+	const stdout = handleOutput(parsed.options, result.stdout, result.error);
+	const stderr = handleOutput(parsed.options, result.stderr, result.error);
+
+	if (result.error || result.status !== 0 || result.signal !== null) {
+		const error = makeError({
+			stdout,
+			stderr,
+			error: result.error,
+			signal: result.signal,
+			exitCode: result.status,
+			command,
+			parsed,
+			timedOut: result.error && result.error.code === 'ETIMEDOUT',
+			isCanceled: false,
+			killed: result.signal !== null
+		});
+
+		if (!parsed.options.reject) {
+			return error;
+		}
+
+		throw error;
+	}
+
+	return {
+		command,
+		exitCode: 0,
+		stdout,
+		stderr,
+		failed: false,
+		timedOut: false,
+		isCanceled: false,
+		killed: false
+	};
+};
+
+module.exports.command = (command, options) => {
+	const [file, ...args] = parseCommand(command);
+	return execa(file, args, options);
+};
+
+module.exports.commandSync = (command, options) => {
+	const [file, ...args] = parseCommand(command);
+	return execa.sync(file, args, options);
+};
+
+module.exports.node = (scriptPath, args, options = {}) => {
+	if (args && !Array.isArray(args) && typeof args === 'object') {
+		options = args;
+		args = [];
+	}
+
+	const stdio = normalizeStdio.node(options);
+
+	const {nodePath = process.execPath, nodeOptions = process.execArgv} = options;
+
+	return execa(
+		nodePath,
+		[
+			...nodeOptions,
+			scriptPath,
+			...(Array.isArray(args) ? args : [])
+		],
+		{
+			...options,
+			stdin: undefined,
+			stdout: undefined,
+			stderr: undefined,
+			stdio,
+			shell: false
+		}
+	);
+};
+
+
+/***/ }),
+
+/***/ 502:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const path = __webpack_require__(622);
+const pathKey = __webpack_require__(539);
+
+const npmRunPath = options => {
+	options = {
+		cwd: process.cwd(),
+		path: process.env[pathKey()],
+		execPath: process.execPath,
+		...options
+	};
+
+	let previous;
+	let cwdPath = path.resolve(options.cwd);
+	const result = [];
+
+	while (previous !== cwdPath) {
+		result.push(path.join(cwdPath, 'node_modules/.bin'));
+		previous = cwdPath;
+		cwdPath = path.resolve(cwdPath, '..');
+	}
+
+	// Ensure the running `node` binary is used
+	const execPathDir = path.resolve(options.cwd, options.execPath, '..');
+	result.push(execPathDir);
+
+	return result.concat(options.path).join(path.delimiter);
+};
+
+module.exports = npmRunPath;
+// TODO: Remove this for the next major release
+module.exports.default = npmRunPath;
+
+module.exports.env = options => {
+	options = {
+		env: process.env,
+		...options
+	};
+
+	const env = {...options.env};
+	const path = pathKey({env});
+
+	options.path = env[path];
+	env[path] = module.exports(options);
+
+	return env;
+};
+
+
+/***/ }),
+
+/***/ 539:
+/***/ (function(module) {
+
+"use strict";
+
+
+const pathKey = (options = {}) => {
+	const environment = options.env || process.env;
+	const platform = options.platform || process.platform;
+
+	if (platform !== 'win32') {
+		return 'PATH';
+	}
+
+	return Object.keys(environment).reverse().find(key => key.toUpperCase() === 'PATH') || 'Path';
+};
+
+module.exports = pathKey;
+// TODO: Remove this for the next major release
+module.exports.default = pathKey;
+
+
+/***/ }),
+
+/***/ 554:
+/***/ (function(module) {
+
+"use strict";
+
+
+const isStream = stream =>
+	stream !== null &&
+	typeof stream === 'object' &&
+	typeof stream.pipe === 'function';
+
+isStream.writable = stream =>
+	isStream(stream) &&
+	stream.writable !== false &&
+	typeof stream._write === 'function' &&
+	typeof stream._writableState === 'object';
+
+isStream.readable = stream =>
+	isStream(stream) &&
+	stream.readable !== false &&
+	typeof stream._read === 'function' &&
+	typeof stream._readableState === 'object';
+
+isStream.duplex = stream =>
+	isStream.writable(stream) &&
+	isStream.readable(stream);
+
+isStream.transform = stream =>
+	isStream.duplex(stream) &&
+	typeof stream._transform === 'function' &&
+	typeof stream._transformState === 'object';
+
+module.exports = isStream;
+
+
+/***/ }),
+
+/***/ 585:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const {PassThrough: PassThroughStream} = __webpack_require__(413);
+
+module.exports = options => {
+	options = {...options};
+
+	const {array} = options;
+	let {encoding} = options;
+	const isBuffer = encoding === 'buffer';
+	let objectMode = false;
+
+	if (array) {
+		objectMode = !(encoding || isBuffer);
+	} else {
+		encoding = encoding || 'utf8';
+	}
+
+	if (isBuffer) {
+		encoding = null;
+	}
+
+	const stream = new PassThroughStream({objectMode});
+
+	if (encoding) {
+		stream.setEncoding(encoding);
+	}
+
+	let length = 0;
+	const chunks = [];
+
+	stream.on('data', chunk => {
+		chunks.push(chunk);
+
+		if (objectMode) {
+			length = chunks.length;
+		} else {
+			length += chunk.length;
+		}
+	});
+
+	stream.getBufferedValue = () => {
+		if (array) {
+			return chunks;
+		}
+
+		return isBuffer ? Buffer.concat(chunks, length) : chunks.join('');
+	};
+
+	stream.getBufferedLength = () => length;
+
+	return stream;
+};
+
+
+/***/ }),
+
+/***/ 592:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const isStream = __webpack_require__(554);
+const getStream = __webpack_require__(766);
+const mergeStream = __webpack_require__(621);
+
+// `input` option
+const handleInput = (spawned, input) => {
+	// Checking for stdin is workaround for https://github.com/nodejs/node/issues/26852
+	// TODO: Remove `|| spawned.stdin === undefined` once we drop support for Node.js <=12.2.0
+	if (input === undefined || spawned.stdin === undefined) {
+		return;
+	}
+
+	if (isStream(input)) {
+		input.pipe(spawned.stdin);
+	} else {
+		spawned.stdin.end(input);
+	}
+};
+
+// `all` interleaves `stdout` and `stderr`
+const makeAllStream = (spawned, {all}) => {
+	if (!all || (!spawned.stdout && !spawned.stderr)) {
+		return;
+	}
+
+	const mixed = mergeStream();
+
+	if (spawned.stdout) {
+		mixed.add(spawned.stdout);
+	}
+
+	if (spawned.stderr) {
+		mixed.add(spawned.stderr);
+	}
+
+	return mixed;
+};
+
+// On failure, `result.stdout|stderr|all` should contain the currently buffered stream
+const getBufferedData = async (stream, streamPromise) => {
+	if (!stream) {
+		return;
+	}
+
+	stream.destroy();
+
+	try {
+		return await streamPromise;
+	} catch (error) {
+		return error.bufferedData;
+	}
+};
+
+const getStreamPromise = (stream, {encoding, buffer, maxBuffer}) => {
+	if (!stream || !buffer) {
+		return;
+	}
+
+	if (encoding) {
+		return getStream(stream, {encoding, maxBuffer});
+	}
+
+	return getStream.buffer(stream, {maxBuffer});
+};
+
+// Retrieve result of child process: exit code, signal, error, streams (stdout/stderr/all)
+const getSpawnedResult = async ({stdout, stderr, all}, {encoding, buffer, maxBuffer}, processDone) => {
+	const stdoutPromise = getStreamPromise(stdout, {encoding, buffer, maxBuffer});
+	const stderrPromise = getStreamPromise(stderr, {encoding, buffer, maxBuffer});
+	const allPromise = getStreamPromise(all, {encoding, buffer, maxBuffer: maxBuffer * 2});
+
+	try {
+		return await Promise.all([processDone, stdoutPromise, stderrPromise, allPromise]);
+	} catch (error) {
+		return Promise.all([
+			{error, signal: error.signal, timedOut: error.timedOut},
+			getBufferedData(stdout, stdoutPromise),
+			getBufferedData(stderr, stderrPromise),
+			getBufferedData(all, allPromise)
+		]);
+	}
+};
+
+const validateInputSync = ({input}) => {
+	if (isStream(input)) {
+		throw new TypeError('The `input` option cannot be a stream in sync mode');
+	}
+};
+
+module.exports = {
+	handleInput,
+	makeAllStream,
+	getSpawnedResult,
+	validateInputSync
+};
+
+
+
+/***/ }),
+
+/***/ 614:
+/***/ (function(module) {
+
+module.exports = require("events");
+
+/***/ }),
+
+/***/ 621:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+
+const { PassThrough } = __webpack_require__(413);
+
+module.exports = function (/*streams...*/) {
+  var sources = []
+  var output  = new PassThrough({objectMode: true})
+
+  output.setMaxListeners(0)
+
+  output.add = add
+  output.isEmpty = isEmpty
+
+  output.on('unpipe', remove)
+
+  Array.prototype.slice.call(arguments).forEach(add)
+
+  return output
+
+  function add (source) {
+    if (Array.isArray(source)) {
+      source.forEach(add)
+      return this
+    }
+
+    sources.push(source);
+    source.once('end', remove.bind(null, source))
+    source.once('error', output.emit.bind(output, 'error'))
+    source.pipe(output, {end: false})
+    return this
+  }
+
+  function isEmpty () {
+    return sources.length == 0;
+  }
+
+  function remove (source) {
+    sources = sources.filter(function (it) { return it !== source })
+    if (!sources.length && output.readable) { output.end() }
+  }
+}
+
+
+/***/ }),
+
+/***/ 622:
+/***/ (function(module) {
+
+module.exports = require("path");
+
+/***/ }),
+
+/***/ 638:
+/***/ (function(module) {
+
+"use strict";
+
+module.exports = /^#!(.*)/;
+
+
+/***/ }),
+
+/***/ 710:
+/***/ (function(module) {
+
+// This is not the set of all possible signals.
+//
+// It IS, however, the set of all signals that trigger
+// an exit on either Linux or BSD systems.  Linux is a
+// superset of the signal names supported on BSD, and
+// the unknown signals just fail to register, so we can
+// catch that easily enough.
+//
+// Don't bother with SIGKILL.  It's uncatchable, which
+// means that we can't fire any callbacks anyway.
+//
+// If a user does happen to register a handler on a non-
+// fatal signal like SIGWINCH or something, and then
+// exit, it'll end up firing `process.emit('exit')`, so
+// the handler will be fired anyway.
+//
+// SIGBUS, SIGFPE, SIGSEGV and SIGILL, when not raised
+// artificially, inherently leave the process in a
+// state from which it is not safe to try and enter JS
+// listeners.
+module.exports = [
+  'SIGABRT',
+  'SIGALRM',
+  'SIGHUP',
+  'SIGINT',
+  'SIGTERM'
+]
+
+if (process.platform !== 'win32') {
+  module.exports.push(
+    'SIGVTALRM',
+    'SIGXCPU',
+    'SIGXFSZ',
+    'SIGUSR2',
+    'SIGTRAP',
+    'SIGSYS',
+    'SIGQUIT',
+    'SIGIOT'
+    // should detect profiler and enable/disable accordingly.
+    // see #21
+    // 'SIGPROF'
+  )
+}
+
+if (process.platform === 'linux') {
+  module.exports.push(
+    'SIGIO',
+    'SIGPOLL',
+    'SIGPWR',
+    'SIGSTKFLT',
+    'SIGUNUSED'
+  )
+}
+
+
+/***/ }),
+
+/***/ 728:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+module.exports = isexe
+isexe.sync = sync
+
+var fs = __webpack_require__(747)
+
+function isexe (path, options, cb) {
+  fs.stat(path, function (er, stat) {
+    cb(er, er ? false : checkStat(stat, options))
+  })
+}
+
+function sync (path, options) {
+  return checkStat(fs.statSync(path), options)
+}
+
+function checkStat (stat, options) {
+  return stat.isFile() && checkMode(stat, options)
+}
+
+function checkMode (stat, options) {
+  var mod = stat.mode
+  var uid = stat.uid
+  var gid = stat.gid
+
+  var myUid = options.uid !== undefined ?
+    options.uid : process.getuid && process.getuid()
+  var myGid = options.gid !== undefined ?
+    options.gid : process.getgid && process.getgid()
+
+  var u = parseInt('100', 8)
+  var g = parseInt('010', 8)
+  var o = parseInt('001', 8)
+  var ug = u | g
+
+  var ret = (mod & o) ||
+    (mod & g) && gid === myGid ||
+    (mod & u) && uid === myUid ||
+    (mod & ug) && myUid === 0
+
+  return ret
+}
+
+
+/***/ }),
+
+/***/ 746:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+
+const cp = __webpack_require__(129);
+const parse = __webpack_require__(855);
+const enoent = __webpack_require__(101);
+
+function spawn(command, args, options) {
+    // Parse the arguments
+    const parsed = parse(command, args, options);
+
+    // Spawn the child process
+    const spawned = cp.spawn(parsed.command, parsed.args, parsed.options);
+
+    // Hook into child process "exit" event to emit an error if the command
+    // does not exists, see: https://github.com/IndigoUnited/node-cross-spawn/issues/16
+    enoent.hookChildProcess(spawned, parsed);
+
+    return spawned;
+}
+
+function spawnSync(command, args, options) {
+    // Parse the arguments
+    const parsed = parse(command, args, options);
+
+    // Spawn the child process
+    const result = cp.spawnSync(parsed.command, parsed.args, parsed.options);
+
+    // Analyze if the command does not exist, see: https://github.com/IndigoUnited/node-cross-spawn/issues/16
+    result.error = result.error || enoent.verifyENOENTSync(result.status, parsed);
+
+    return result;
+}
+
+module.exports = spawn;
+module.exports.spawn = spawn;
+module.exports.sync = spawnSync;
+
+module.exports._parse = parse;
+module.exports._enoent = enoent;
+
+
+/***/ }),
+
+/***/ 747:
+/***/ (function(module) {
+
+module.exports = require("fs");
+
+/***/ }),
+
+/***/ 766:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const {constants: BufferConstants} = __webpack_require__(293);
+const pump = __webpack_require__(341);
+const bufferStream = __webpack_require__(585);
+
+class MaxBufferError extends Error {
+	constructor() {
+		super('maxBuffer exceeded');
+		this.name = 'MaxBufferError';
+	}
+}
+
+async function getStream(inputStream, options) {
+	if (!inputStream) {
+		return Promise.reject(new Error('Expected a stream'));
+	}
+
+	options = {
+		maxBuffer: Infinity,
+		...options
+	};
+
+	const {maxBuffer} = options;
+
+	let stream;
+	await new Promise((resolve, reject) => {
+		const rejectPromise = error => {
+			// Don't retrieve an oversized buffer.
+			if (error && stream.getBufferedLength() <= BufferConstants.MAX_LENGTH) {
+				error.bufferedData = stream.getBufferedValue();
+			}
+
+			reject(error);
+		};
+
+		stream = pump(inputStream, bufferStream(options), error => {
+			if (error) {
+				rejectPromise(error);
+				return;
+			}
+
+			resolve();
+		});
+
+		stream.on('data', () => {
+			if (stream.getBufferedLength() > maxBuffer) {
+				rejectPromise(new MaxBufferError());
+			}
+		});
+	});
+
+	return stream.getBufferedValue();
+}
+
+module.exports = getStream;
+// TODO: Remove this for the next major release
+module.exports.default = getStream;
+module.exports.buffer = (stream, options) => getStream(stream, {...options, encoding: 'buffer'});
+module.exports.array = (stream, options) => getStream(stream, {...options, array: true});
+module.exports.MaxBufferError = MaxBufferError;
+
+
+/***/ }),
+
+/***/ 779:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(exports,"__esModule",{value:true});exports.signalsByNumber=exports.signalsByName=void 0;var _os=__webpack_require__(87);
+
+var _signals=__webpack_require__(435);
+var _realtime=__webpack_require__(295);
+
+
+
+const getSignalsByName=function(){
+const signals=(0,_signals.getSignals)();
+return signals.reduce(getSignalByName,{});
+};
+
+const getSignalByName=function(
+signalByNameMemo,
+{name,number,description,supported,action,forced,standard})
+{
+return{
+...signalByNameMemo,
+[name]:{name,number,description,supported,action,forced,standard}};
+
+};
+
+const signalsByName=getSignalsByName();exports.signalsByName=signalsByName;
+
+
+
+
+const getSignalsByNumber=function(){
+const signals=(0,_signals.getSignals)();
+const length=_realtime.SIGRTMAX+1;
+const signalsA=Array.from({length},(value,number)=>
+getSignalByNumber(number,signals));
+
+return Object.assign({},...signalsA);
+};
+
+const getSignalByNumber=function(number,signals){
+const signal=findSignalByNumber(number,signals);
+
+if(signal===undefined){
+return{};
+}
+
+const{name,description,supported,action,forced,standard}=signal;
+return{
+[number]:{
+name,
+number,
+description,
+supported,
+action,
+forced,
+standard}};
+
+
+};
+
+
+
+const findSignalByNumber=function(number,signals){
+const signal=signals.find(({name})=>_os.constants.signals[name]===number);
+
+if(signal!==undefined){
+return signal;
+}
+
+return signals.find(signalA=>signalA.number===number);
+};
+
+const signalsByNumber=getSignalsByNumber();exports.signalsByNumber=signalsByNumber;
+//# sourceMappingURL=main.js.map
+
+/***/ }),
+
+/***/ 814:
+/***/ (function(module) {
+
+"use strict";
+
+
+const nativePromisePrototype = (async () => {})().constructor.prototype;
+const descriptors = ['then', 'catch', 'finally'].map(property => [
+	property,
+	Reflect.getOwnPropertyDescriptor(nativePromisePrototype, property)
+]);
+
+// The return value is a mixin of `childProcess` and `Promise`
+const mergePromise = (spawned, promise) => {
+	for (const [property, descriptor] of descriptors) {
+		// Starting the main `promise` is deferred to avoid consuming streams
+		const value = typeof promise === 'function' ?
+			(...args) => Reflect.apply(descriptor.value, promise(), args) :
+			descriptor.value.bind(promise);
+
+		Reflect.defineProperty(spawned, property, {...descriptor, value});
+	}
+
+	return spawned;
+};
+
+// Use promises instead of `child_process` events
+const getSpawnedPromise = spawned => {
+	return new Promise((resolve, reject) => {
+		spawned.on('exit', (exitCode, signal) => {
+			resolve({exitCode, signal});
+		});
+
+		spawned.on('error', error => {
+			reject(error);
+		});
+
+		if (spawned.stdin) {
+			spawned.stdin.on('error', error => {
+				reject(error);
+			});
+		}
+	});
+};
+
+module.exports = {
+	mergePromise,
+	getSpawnedPromise
+};
+
+
+
+/***/ }),
+
+/***/ 819:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const os = __webpack_require__(87);
+const onExit = __webpack_require__(931);
+
+const DEFAULT_FORCE_KILL_TIMEOUT = 1000 * 5;
+
+// Monkey-patches `childProcess.kill()` to add `forceKillAfterTimeout` behavior
+const spawnedKill = (kill, signal = 'SIGTERM', options = {}) => {
+	const killResult = kill(signal);
+	setKillTimeout(kill, signal, options, killResult);
+	return killResult;
+};
+
+const setKillTimeout = (kill, signal, options, killResult) => {
+	if (!shouldForceKill(signal, options, killResult)) {
+		return;
+	}
+
+	const timeout = getForceKillAfterTimeout(options);
+	const t = setTimeout(() => {
+		kill('SIGKILL');
+	}, timeout);
+
+	// Guarded because there's no `.unref()` when `execa` is used in the renderer
+	// process in Electron. This cannot be tested since we don't run tests in
+	// Electron.
+	// istanbul ignore else
+	if (t.unref) {
+		t.unref();
+	}
+};
+
+const shouldForceKill = (signal, {forceKillAfterTimeout}, killResult) => {
+	return isSigterm(signal) && forceKillAfterTimeout !== false && killResult;
+};
+
+const isSigterm = signal => {
+	return signal === os.constants.signals.SIGTERM ||
+		(typeof signal === 'string' && signal.toUpperCase() === 'SIGTERM');
+};
+
+const getForceKillAfterTimeout = ({forceKillAfterTimeout = true}) => {
+	if (forceKillAfterTimeout === true) {
+		return DEFAULT_FORCE_KILL_TIMEOUT;
+	}
+
+	if (!Number.isFinite(forceKillAfterTimeout) || forceKillAfterTimeout < 0) {
+		throw new TypeError(`Expected the \`forceKillAfterTimeout\` option to be a non-negative integer, got \`${forceKillAfterTimeout}\` (${typeof forceKillAfterTimeout})`);
+	}
+
+	return forceKillAfterTimeout;
+};
+
+// `childProcess.cancel()`
+const spawnedCancel = (spawned, context) => {
+	const killResult = spawned.kill();
+
+	if (killResult) {
+		context.isCanceled = true;
+	}
+};
+
+const timeoutKill = (spawned, signal, reject) => {
+	spawned.kill(signal);
+	reject(Object.assign(new Error('Timed out'), {timedOut: true, signal}));
+};
+
+// `timeout` option handling
+const setupTimeout = (spawned, {timeout, killSignal = 'SIGTERM'}, spawnedPromise) => {
+	if (timeout === 0 || timeout === undefined) {
+		return spawnedPromise;
+	}
+
+	if (!Number.isFinite(timeout) || timeout < 0) {
+		throw new TypeError(`Expected the \`timeout\` option to be a non-negative integer, got \`${timeout}\` (${typeof timeout})`);
+	}
+
+	let timeoutId;
+	const timeoutPromise = new Promise((resolve, reject) => {
+		timeoutId = setTimeout(() => {
+			timeoutKill(spawned, killSignal, reject);
+		}, timeout);
+	});
+
+	const safeSpawnedPromise = spawnedPromise.finally(() => {
+		clearTimeout(timeoutId);
+	});
+
+	return Promise.race([timeoutPromise, safeSpawnedPromise]);
+};
+
+// `cleanup` option handling
+const setExitHandler = async (spawned, {cleanup, detached}, timedPromise) => {
+	if (!cleanup || detached) {
+		return timedPromise;
+	}
+
+	const removeExitHandler = onExit(() => {
+		spawned.kill();
+	});
+
+	return timedPromise.finally(() => {
+		removeExitHandler();
+	});
+};
+
+module.exports = {
+	spawnedKill,
+	spawnedCancel,
+	setupTimeout,
+	setExitHandler
+};
+
+
+/***/ }),
+
+/***/ 855:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+
+const path = __webpack_require__(622);
+const resolveCommand = __webpack_require__(274);
+const escape = __webpack_require__(48);
+const readShebang = __webpack_require__(252);
+
+const isWin = process.platform === 'win32';
+const isExecutableRegExp = /\.(?:com|exe)$/i;
+const isCmdShimRegExp = /node_modules[\\/].bin[\\/][^\\/]+\.cmd$/i;
+
+function detectShebang(parsed) {
+    parsed.file = resolveCommand(parsed);
+
+    const shebang = parsed.file && readShebang(parsed.file);
+
+    if (shebang) {
+        parsed.args.unshift(parsed.file);
+        parsed.command = shebang;
+
+        return resolveCommand(parsed);
+    }
+
+    return parsed.file;
+}
+
+function parseNonShell(parsed) {
+    if (!isWin) {
+        return parsed;
+    }
+
+    // Detect & add support for shebangs
+    const commandFile = detectShebang(parsed);
+
+    // We don't need a shell if the command filename is an executable
+    const needsShell = !isExecutableRegExp.test(commandFile);
+
+    // If a shell is required, use cmd.exe and take care of escaping everything correctly
+    // Note that `forceShell` is an hidden option used only in tests
+    if (parsed.options.forceShell || needsShell) {
+        // Need to double escape meta chars if the command is a cmd-shim located in `node_modules/.bin/`
+        // The cmd-shim simply calls execute the package bin file with NodeJS, proxying any argument
+        // Because the escape of metachars with ^ gets interpreted when the cmd.exe is first called,
+        // we need to double escape them
+        const needsDoubleEscapeMetaChars = isCmdShimRegExp.test(commandFile);
+
+        // Normalize posix paths into OS compatible paths (e.g.: foo/bar -> foo\bar)
+        // This is necessary otherwise it will always fail with ENOENT in those cases
+        parsed.command = path.normalize(parsed.command);
+
+        // Escape command & arguments
+        parsed.command = escape.command(parsed.command);
+        parsed.args = parsed.args.map((arg) => escape.argument(arg, needsDoubleEscapeMetaChars));
+
+        const shellCommand = [parsed.command].concat(parsed.args).join(' ');
+
+        parsed.args = ['/d', '/s', '/c', `"${shellCommand}"`];
+        parsed.command = process.env.comspec || 'cmd.exe';
+        parsed.options.windowsVerbatimArguments = true; // Tell node's spawn that the arguments are already escaped
+    }
+
+    return parsed;
+}
+
+function parse(command, args, options) {
+    // Normalize arguments, similar to nodejs
+    if (args && !Array.isArray(args)) {
+        options = args;
+        args = null;
+    }
+
+    args = args ? args.slice(0) : []; // Clone array to avoid changing the original
+    options = Object.assign({}, options); // Clone object to avoid changing the original
+
+    // Build our parsed object
+    const parsed = {
+        command,
+        args,
+        options,
+        file: undefined,
+        original: {
+            command,
+            args,
+        },
+    };
+
+    // Delegate further parsing to shell or non-shell
+    return options.shell ? parsed : parseNonShell(parsed);
+}
+
+module.exports = parse;
+
+
+/***/ }),
+
+/***/ 931:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+// Note: since nyc uses this module to output coverage, any lines
+// that are in the direct sync flow of nyc's outputCoverage are
+// ignored, since we can never get coverage for them.
+var assert = __webpack_require__(357)
+var signals = __webpack_require__(710)
+var isWin = /^win/i.test(process.platform)
+
+var EE = __webpack_require__(614)
+/* istanbul ignore if */
+if (typeof EE !== 'function') {
+  EE = EE.EventEmitter
+}
+
+var emitter
+if (process.__signal_exit_emitter__) {
+  emitter = process.__signal_exit_emitter__
+} else {
+  emitter = process.__signal_exit_emitter__ = new EE()
+  emitter.count = 0
+  emitter.emitted = {}
+}
+
+// Because this emitter is a global, we have to check to see if a
+// previous version of this library failed to enable infinite listeners.
+// I know what you're about to say.  But literally everything about
+// signal-exit is a compromise with evil.  Get used to it.
+if (!emitter.infinite) {
+  emitter.setMaxListeners(Infinity)
+  emitter.infinite = true
+}
+
+module.exports = function (cb, opts) {
+  assert.equal(typeof cb, 'function', 'a callback must be provided for exit handler')
+
+  if (loaded === false) {
+    load()
+  }
+
+  var ev = 'exit'
+  if (opts && opts.alwaysLast) {
+    ev = 'afterexit'
+  }
+
+  var remove = function () {
+    emitter.removeListener(ev, cb)
+    if (emitter.listeners('exit').length === 0 &&
+        emitter.listeners('afterexit').length === 0) {
+      unload()
+    }
+  }
+  emitter.on(ev, cb)
+
+  return remove
+}
+
+module.exports.unload = unload
+function unload () {
+  if (!loaded) {
+    return
+  }
+  loaded = false
+
+  signals.forEach(function (sig) {
+    try {
+      process.removeListener(sig, sigListeners[sig])
+    } catch (er) {}
+  })
+  process.emit = originalProcessEmit
+  process.reallyExit = originalProcessReallyExit
+  emitter.count -= 1
+}
+
+function emit (event, code, signal) {
+  if (emitter.emitted[event]) {
+    return
+  }
+  emitter.emitted[event] = true
+  emitter.emit(event, code, signal)
+}
+
+// { <signal>: <listener fn>, ... }
+var sigListeners = {}
+signals.forEach(function (sig) {
+  sigListeners[sig] = function listener () {
+    // If there are no other listeners, an exit is coming!
+    // Simplest way: remove us and then re-send the signal.
+    // We know that this will kill the process, so we can
+    // safely emit now.
+    var listeners = process.listeners(sig)
+    if (listeners.length === emitter.count) {
+      unload()
+      emit('exit', null, sig)
+      /* istanbul ignore next */
+      emit('afterexit', null, sig)
+      /* istanbul ignore next */
+      if (isWin && sig === 'SIGHUP') {
+        // "SIGHUP" throws an `ENOSYS` error on Windows,
+        // so use a supported signal instead
+        sig = 'SIGINT'
+      }
+      process.kill(process.pid, sig)
+    }
+  }
+})
+
+module.exports.signals = function () {
+  return signals
+}
+
+module.exports.load = load
+
+var loaded = false
+
+function load () {
+  if (loaded) {
+    return
+  }
+  loaded = true
+
+  // This is the number of onSignalExit's that are in play.
+  // It's important so that we can count the correct number of
+  // listeners on signals, and don't wait for the other one to
+  // handle it instead of us.
+  emitter.count += 1
+
+  signals = signals.filter(function (sig) {
+    try {
+      process.on(sig, sigListeners[sig])
+      return true
+    } catch (er) {
+      return false
+    }
+  })
+
+  process.emit = processEmit
+  process.reallyExit = processReallyExit
+}
+
+var originalProcessReallyExit = process.reallyExit
+function processReallyExit (code) {
+  process.exitCode = code || 0
+  emit('exit', process.exitCode, null)
+  /* istanbul ignore next */
+  emit('afterexit', process.exitCode, null)
+  /* istanbul ignore next */
+  originalProcessReallyExit.call(process, process.exitCode)
+}
+
+var originalProcessEmit = process.emit
+function processEmit (ev, arg) {
+  if (ev === 'exit') {
+    if (arg !== undefined) {
+      process.exitCode = arg
+    }
+    var ret = originalProcessEmit.apply(this, arguments)
+    emit('exit', process.exitCode, null)
+    /* istanbul ignore next */
+    emit('afterexit', process.exitCode, null)
+    return ret
+  } else {
+    return originalProcessEmit.apply(this, arguments)
+  }
+}
+
+
+/***/ }),
+
+/***/ 932:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const execa = __webpack_require__(447);
+
+module.exports = async ({ github, context }) => {
+  console.log(github, context);
+  const { stdout } = await execa("git", [
+    "log",
+    "--no-merges",
+    `--pretty='format:"%h: %b"'`,
+    `master..${context.payload.pull_request.head.ref}`
+  ]);
+  const issue_numbers = new Set();
+  for (const issue of stdout.match(/#([\d]+)/g)) {
+    issue_numbers.add(issue.split("#")[1]);
+  }
+  console.log(issue_numbers);
+
+  const releaseLog = [];
+  for (const issue_number of issue_numbers) {
+    const { data } = await github.issues.get({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      issue_number
+    });
+    if (!data.labels.some((label) => label.name === "development")) {
+      releaseLog.push(`- [X] ${data.title} #${data.number}`);
+    }
+  }
+  return releaseLog.join("\r\n");
+};
+
+
+/***/ }),
+
+/***/ 940:
+/***/ (function(module) {
+
+// Returns a wrapper function that returns a wrapped callback
+// The wrapper function should do some stuff, and return a
+// presumably different callback function.
+// This makes sure that own properties are retained, so that
+// decorations and such are not lost along the way.
+module.exports = wrappy
+function wrappy (fn, cb) {
+  if (fn && cb) return wrappy(fn)(cb)
+
+  if (typeof fn !== 'function')
+    throw new TypeError('need wrapper function')
+
+  Object.keys(fn).forEach(function (k) {
+    wrapper[k] = fn[k]
+  })
+
+  return wrapper
+
+  function wrapper() {
+    var args = new Array(arguments.length)
+    for (var i = 0; i < args.length; i++) {
+      args[i] = arguments[i]
+    }
+    var ret = fn.apply(this, args)
+    var cb = args[args.length-1]
+    if (typeof ret === 'function' && ret !== cb) {
+      Object.keys(cb).forEach(function (k) {
+        ret[k] = cb[k]
+      })
+    }
+    return ret
+  }
+}
+
+
+/***/ })
+
+/******/ });

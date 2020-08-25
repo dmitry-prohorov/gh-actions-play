@@ -1,6 +1,7 @@
 const execa = require("execa");
 
 module.exports = async ({ github, context }) => {
+  console.log(github, context);
   const { stdout } = await execa("git", [
     "log",
     "--no-merges",
