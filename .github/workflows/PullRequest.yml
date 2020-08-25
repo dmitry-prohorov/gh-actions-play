@@ -24,7 +24,9 @@ jobs:
       with:
         fetch-depth: 0
     - name:  Checks
-      run: /usr/bin/git log --no-merges
+      run: |
+        /usr/bin/git log --no-merges
+        /usr/bin/git branch --list
 
     - name: Context
       uses: actions/github-script@v2
