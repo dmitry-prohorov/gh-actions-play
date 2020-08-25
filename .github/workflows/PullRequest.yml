@@ -21,11 +21,14 @@ jobs:
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
 
     - name: Context
       uses: actions/github-script@v2
       with:
         script: |
+          const execa = require('execa')
           console.log(context)
           console.log(context.payload.pull_request.body)
           
