@@ -24,11 +24,10 @@ jobs:
 
     - name: Context
       uses: actions/github-script@v2
-      env:
-        CONTEXT: ${{ toJson(github) }}
       with:
         script: |
-          console.log(process.env.CONTEXT)
+          console.log(context)
+          console.log(context.pull_request.body)
     - name: Skip if draft
       if: github.event.pull_request.draft == false
       run: echo "PR not draft"
