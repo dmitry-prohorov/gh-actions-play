@@ -9,6 +9,7 @@ module.exports = async ({ github, context }) => {
   ]);
   const issue_numbers = new Set();
   const matches = stdout.match(/#([\d]+)/g);
+  console.log(matches);
   if (matches) {
     for (const issue of matches) {
       issue_numbers.add(issue.split("#")[1]);
