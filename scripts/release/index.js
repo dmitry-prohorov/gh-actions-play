@@ -8,6 +8,8 @@ module.exports = async ({ github, context }) => {
     `${context.payload.pull_request.base.sha}..${context.payload.pull_request.head.sha}`
   ]);
   console.log(stdout);
+  console.log(context.payload.pull_request.base.sha);
+  console.log(context.payload.pull_request.head.sha);
   const issue_numbers = new Set();
   const matches = stdout.match(/#([\d]+)/g);
   console.log(matches);
