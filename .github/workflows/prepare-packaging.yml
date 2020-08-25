@@ -4,7 +4,124 @@ on:
   workflow_dispatch:
 
 jobs:
-  prepare:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: "13.x"
+
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: Install Salesforce CLI
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: |
+          npm install sfdx-cli
+          node_modules/sfdx-cli/bin/run --version
+          node_modules/sfdx-cli/bin/run plugins --core
+
+      - name: Authenticate DevHub
+        run: |
+          echo "${SALESFORCE_JWT_SECRET_KEY}" > server.key
+          node_modules/sfdx-cli/bin/run force:auth:jwt:grant --clientid ${{ secrets.SUMO_PROD_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.SUMO_PROD_USERNAME}} --setdefaultdevhubusername -a devhub
+        env:
+          SALESFORCE_JWT_SECRET_KEY: ${{ secrets.SUMO_PROD_JWT_SECRET_KEY }}
+
+      - name: Prepare libs
+        env:
+          MODULES_CACHED: steps.cache-node-modules.outputs.cache-hit
+        run: |
+          if [ "$MODULES_CACHED" == "true" ]; then
+            npm run --prefix ./libs build-all-quick-parallel
+          else
+            npm run postinstall
+            npm run --prefix ./libs build-all-long-parallel
+          fi
+
+      - name: Create scratch org
+        run: node_modules/sfdx-cli/bin/run force:org:create -v devhub -s -f config/scratch/developer-org-def.template.json -a test-org -d 1
+
+      - name: Deploy source
+        run: node_modules/sfdx-cli/bin/run force:source:push -u test-org
+
+      - name: Create deployment issue
+        if: failure()
+        uses: actions/github-script@v2
+        with:
+          script: |
+            const logUrl = `${context.payload.repository.html_url}/actions/runs/${process.env.GITHUB_RUN_ID}`
+
+            await github.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `Auto-generated message by ${context.workflow}(${context.eventName}).\n\n### [Details](${logUrl})`,
+              title: `[Release Deployment]: Fix deployment for branch "${context.ref}".`,
+              assignees: [context.actor],
+              labels: ['automation', 'development', 'bug']
+            })
+
+      - name: Run Apex test
+        run: |
+          mkdir test-results
+          SFDX_IMPROVED_CODE_COVERAGE='true' node_modules/sfdx-cli/bin/run force:apex:test:run -d test-results -r json -c -u test-org
+
+      - name: Extract test results
+        id: result
+        uses: actions/github-script@v2
+        with:
+          script: |
+            const fs = require('fs')
+            const path = require('path')
+            const testRunId = await fs.promises.readFile(path.resolve('test-results', 'test-run-id.txt'), 'utf8')
+            const result = JSON.parse(await fs.promises.readFile(path.resolve('test-results', `test-result-${testRunId}.json`), 'utf8'))
+            console.log('------------SUMMARY--------------')
+            console.log(result.summary)
+
+            const code = '```';
+            const summary = `### Summary\n${code}javascript\n${JSON.stringify(result.summary, null, '  ')}\n${code}`
+            if (result.summary.failing > 0) {
+              const fails = result.tests.filter(test => test.Outcome === 'Fail')
+              console.log('------------FAILS--------------')
+              fails.forEach(test => {
+                console.group(`Method: ${test.FullName}`);
+                console.group(`Trace:\n${test.StackTrace}`);
+                console.groupEnd();
+                console.log(`Message: ${test.Message}`);
+                console.groupEnd();
+              })
+              const issueFails = fails.map(test => {
+                return `- [ ] ${test.FullName}`
+              }).join('\n')
+              const logUrl = `${context.payload.repository.html_url}/actions/runs/${process.env.GITHUB_RUN_ID}`
+
+              await github.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `Auto-generated message by ${context.workflow}(${context.eventName}).\n\n${summary}\n\n### Fails:\n${issueFails}\n\n### [Details](${logUrl})`,
+                title: `[Release Coverage]: Fix tests in branch "${context.ref}".`,
+                assignees: [context.actor],
+                labels: ['automation', 'development', 'bug']
+              })
+            }
+
+      - name: Delete scratch org
+        if: always()
+        run: node_modules/sfdx-cli/bin/run force:org:delete -u test-org --noprompt
+
+  prepare-metadata:
     runs-on: ubuntu-latest
     outputs:
       delete-paths: ${{ steps.check.outputs.delete-paths }}
@@ -111,7 +228,7 @@ jobs:
             core.setOutput('deploy-paths', `"${Array.from(deployMetadata).filter(file => isSource(file)).join(', \\\n')}"`)
             core.setOutput('delete-paths', `"${Array.from(deleteMetadata).filter(file => isSource(file)).join(', \\\n')}"`)
 
-  deploy:
+  deploy-metadata:
     needs: prepare
     runs-on: ubuntu-latest
     steps:
@@ -147,7 +264,8 @@ jobs:
         run: |
           node_modules/sfdx-cli/bin/run force:source:convert -p force-app/main/default -d src -n 'Dpro Play Package'
           node_modules/sfdx-cli/bin/run force:mdapi:deploy -w -1 -d src -u automation
-  delete:
+
+  delete-metadata:
     needs: [prepare, deploy]
     runs-on: ubuntu-latest
     if: needs.prepare.outputs.delete-paths != '""'

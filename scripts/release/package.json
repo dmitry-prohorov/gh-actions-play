@@ -1,0 +1,17 @@
+{
+  "name": "release",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@vercel/ncc": "^0.23.0"
+  },
+  "dependencies": {
+    "execa": "^4.0.3"
+  }
+}

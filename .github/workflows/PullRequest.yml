@@ -7,9 +7,11 @@ name: PullRequests
 on:
   pull_request:
     branches: [ master ]
+    types: [synchronize, opened, reopened, ready_for_review]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+     
   # This workflow contains a single job called "build"
   check:
     # The type of runner that the job will run on
@@ -19,11 +21,45 @@ jobs:
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
 
     - name: Context
       uses: actions/github-script@v2
-      env:
-        CONTEXT: ${{ toJson(github) }}
       with:
         script: |
-          console.log(process.env.CONTEXT)
+          const execa = require('execa')
+          console.log(context)
+          console.log(context.payload.pull_request.body)
+          
+          function getIssueNumber(body) {
+            const matches = body.match(/ISSUE TO RESOLVE: #([\d]+)/g)
+            if (!matches) return null
+            return matches[0].split('#')[1]
+          }
+          const issue_number = getIssueNumber(context.payload.pull_request.body)
+          const request = {
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: 'Fix please test body'
+          }
+          if (issue_number) {
+            await github.issues.createComment({ ...request, issue_number })
+          } else {
+            const issue = await github.issues.create({
+              ...request,
+              title: `['Test Coverage']: Fix tests in branch "${context.payload.pull_request.head.ref}".`,
+              assignees: [context.actor],
+              labels: ['bug']
+            })
+            console.log(issue)
+            await github.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              body: `${context.payload.pull_request.body}\n\r\n\r### ISSUE TO RESOLVE: #${issue.data.number}`
+            })
+          }
+    - name: Skip if draft
+      if: github.event.pull_request.draft == false
+      run: echo "PR not draft"
