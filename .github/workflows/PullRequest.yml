@@ -27,7 +27,29 @@ jobs:
       with:
         script: |
           console.log(context)
-          console.log(context.pull_request.body)
+          console.log(context.payload.pull_request.body)
+          
+          function getIssueNumber(body) {
+            const matches = body.match(/ISSUE TO RESOLVE: #([\d]+)/g)
+            if (!matches) return null
+            return matches[0].split('#')[1]
+          }
+          const issue_number = getIssueNumber(context.payload.pull_request.body)
+          const request = {
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: 'Fix please test body'
+          }
+          if (issue_number) {
+            await github.issues.createComment({ ...request, issue_number })
+          } else {
+            await github.issues.create({
+              ...request,
+              title: `['Test Coverage']: Fix tests in branch "${context.ref}".`,
+              assignees: [context.actor],
+              labels: ['bug']
+            })
+          }
     - name: Skip if draft
       if: github.event.pull_request.draft == false
       run: echo "PR not draft"
