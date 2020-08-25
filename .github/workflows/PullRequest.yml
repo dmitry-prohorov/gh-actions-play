@@ -24,7 +24,7 @@ jobs:
       with:
         fetch-depth: 0
     - name:  Checks
-      run: /usr/bin/git log --no-merges 'refs/heads/master..refs/pull/29/merge'
+      run: /usr/bin/git log --no-merges
 
     - name: Context
       uses: actions/github-script@v2
