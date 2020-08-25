@@ -1,12 +1,11 @@
 const execa = require("execa");
 
 module.exports = async ({ github, context }) => {
-  console.log(github, context);
   const { stdout } = await execa("git", [
     "log",
     "--no-merges",
     `--pretty='format:"%h: %b"'`,
-    `master..${context.payload.pull_request.head.ref}`
+    `${context.payload.pull_request.base.sha}..${context.payload.pull_request.head.sha}`
   ]);
   const issue_numbers = new Set();
   for (const issue of stdout.match(/#([\d]+)/g)) {
