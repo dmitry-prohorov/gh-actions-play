@@ -54,7 +54,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.payload.pull_request.number,
-              body: `${context.payload.pull_request.body}\n\r\n\r### ISSUE TO RESOLVE: #${issue.number}`
+              body: `${context.payload.pull_request.body}\n\r\n\r### ISSUE TO RESOLVE: #${issue.data.number}`
             })
           }
     - name: Skip if draft
