@@ -45,17 +45,6 @@ jobs:
       - name: Create scratch org
         run: node_modules/sfdx-cli/bin/run force:org:create -v devhub -s -f config/project-scratch-def.json -a test-org -d 1
 
-      - name: Prepare libs
-        env:
-          MODULES_CACHED: steps.cache-node-modules.outputs.cache-hit
-        run: |
-          if [ "$MODULES_CACHED" == "true" ]; then
-            npm run --prefix ./libs build-all-quick-parallel
-          else
-            npm run postinstall
-            npm run --prefix ./libs build-all-long-parallel
-          fi
-
       - name: Deploy source
         run: node_modules/sfdx-cli/bin/run force:source:push -u test-org
 
