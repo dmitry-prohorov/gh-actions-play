@@ -58,6 +58,8 @@ jobs:
       - name: Get test run summary
         id: result
         uses: actions/github-script@v3
+        env:
+          TEST_RESULTS: ${{ steps.tests.outputs.result }}
         with:
           script: |
             function getIssueNumber(body) {
@@ -67,10 +69,11 @@ jobs:
             }
             const issue_number = getIssueNumber(context.payload.pull_request.body)
 
-            const fs = require('fs')
+            /* const fs = require('fs')
             const path = require('path')
             const testRunId = await fs.promises.readFile(path.resolve('test-results', 'test-run-id.txt'), 'utf8')
-            const result = JSON.parse(await fs.promises.readFile(path.resolve('test-results', `test-result-${testRunId}.json`), 'utf8'))
+            const result = JSON.parse(await fs.promises.readFile(path.resolve('test-results', `test-result-${testRunId}.json`), 'utf8'))*/
+            const result = JSON.parse(process.env.TEST_RESULTS)
             console.log('------------SUMMARY--------------')
             console.log(result.summary)
 
