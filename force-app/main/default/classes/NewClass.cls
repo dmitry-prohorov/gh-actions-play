@@ -28,6 +28,6 @@ public with sharing class NewClass {
     a++;
     a++;
     a++;
-    throw IllegalArgumentException('hahaha');
+    throw new IllegalArgumentException('hahaha');
   }
 }
