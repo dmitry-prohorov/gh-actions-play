@@ -73,7 +73,8 @@ jobs:
             const path = require('path')
             const testRunId = await fs.promises.readFile(path.resolve('test-results', 'test-run-id.txt'), 'utf8')
             const result = JSON.parse(await fs.promises.readFile(path.resolve('test-results', `test-result-${testRunId}.json`), 'utf8'))*/
-            const result = JSON.parse(process.env.TEST_RESULTS)
+            const response = JSON.parse(process.env.TEST_RESULTS)
+            const result = response.result
             console.log('------------SUMMARY--------------')
             console.log(result.summary)
 
