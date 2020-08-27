@@ -53,7 +53,7 @@ jobs:
         run: |
           mkdir test-results
           export SFDX_JSON_TO_STDOUT=true
-          echo ::set-output name=result::$(SFDX_IMPROVED_CODE_COVERAGE=true node_modules/sfdx-cli/bin/run force:apex:test:run -c -u test-org -w 60 --json)
+          echo ::set-output name=result::$(SFDX_IMPROVED_CODE_COVERAGE=true node_modules/sfdx-cli/bin/run force:apex:test:run -r json -c -u test-org -w 60 --json)
 
       - name: Get test run summary
         id: result
