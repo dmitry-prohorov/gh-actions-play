@@ -51,7 +51,7 @@ jobs:
       - name: Run Apex test
         run: |
           mkdir test-results
-          SFDX_IMPROVED_CODE_COVERAGE='true' node_modules/sfdx-cli/bin/run force:apex:test:run -d test-results -r json -c -u test-org -w 60 --json
+          SFDX_JSON_TO_STDOUT=true SFDX_IMPROVED_CODE_COVERAGE=true node_modules/sfdx-cli/bin/run force:apex:test:run -d test-results -r json -c -u test-org -w 60 --json
 
       - name: Get test run summary
         id: result
