@@ -49,6 +49,7 @@ jobs:
         run: node_modules/sfdx-cli/bin/run force:source:push -u test-org
 
       - name: Run Apex test
+        continue-on-error: true
         run: |
           mkdir test-results
           export SFDX_IMPROVED_CODE_COVERAGE=true
@@ -56,7 +57,6 @@ jobs:
           node_modules/sfdx-cli/bin/run force:apex:test:run -r json -c -u test-org -w 60 --json -d test-results
 
       - name: Process tests results
-        if: always()
         uses: actions/github-script@v3
         with:
           script: |
