@@ -49,28 +49,23 @@ jobs:
         run: node_modules/sfdx-cli/bin/run force:source:push -u test-org
 
       - name: Run Apex test
-        id: tests
         run: |
           mkdir test-results
-          export SFDX_JSON_TO_STDOUT=true
           export SFDX_IMPROVED_CODE_COVERAGE=true
           #echo ::set-output name=result::$(SFDX_IMPROVED_CODE_COVERAGE=true node_modules/sfdx-cli/bin/run force:apex:test:run -r json -c -u test-org -w 60 --json)
           node_modules/sfdx-cli/bin/run force:apex:test:run -r json -c -u test-org -w 60 --json -d test-results
 
-      - name: Get test run summary
-        id: result
+      - name: Process tests results
+        if: always()
         uses: actions/github-script@v3
-        env:
-          TEST_RESULTS: ${{ steps.tests.outputs.result }}
         with:
           script: |
             function getIssueNumber(body) {
-              const matches = body.match(/ISSUE TO RESOLVE: #([\d]+)/g)
-              if (!matches) return null
-              return matches[0].split('#')[1]
+                const matches = body.match(/ISSUE TO RESOLVE: #([\d]+)/g)
+                if (!matches) return null
+                return matches[0].split('#')[1]
             }
             const issue_number = getIssueNumber(context.payload.pull_request.body)
-
             const fs = require('fs')
             const path = require('path')
             const testRunId = await fs.promises.readFile(path.resolve('test-results', 'test-run-id.txt'), 'utf8')
