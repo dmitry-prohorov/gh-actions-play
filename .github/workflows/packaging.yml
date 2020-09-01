@@ -28,6 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       base: ${{ steps.setup.outputs.base }}
+      api-version: ${{ steps.setup.outputs.version}}
     steps:
       - name: Setup job environment
         id: setup
@@ -40,6 +41,9 @@ jobs:
               branch: 'master'
             })
             core.setOutput('base', masterBranch.data.commit.sha)
+
+            const project = JSON.parse(require('sfdx-project.json'))
+            core.setOutput('version', project.sourceApiVersion)
 
   package-deploy:
     needs: package-prepare
@@ -92,6 +96,7 @@ jobs:
           <Package xmlns="http://soap.sforce.com/2006/04/metadata">
                 <fullName>${{ github.event.inputs.name }}</fullName>
                 <postInstallClass>PostInstall</postInstallClass>
+                <version>${{ needs.package-prepare.outputs.api-version }}</version>
           </Package>
           EOF
           node_modules/sfdx-cli/bin/run force:mdapi:deploy -d postinstall -w -1 -u packaging
