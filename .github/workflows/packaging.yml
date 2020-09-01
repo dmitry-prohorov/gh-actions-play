@@ -43,7 +43,7 @@ jobs:
             })
             core.setOutput('base', masterBranch.data.commit.sha)
 
-            const project = JSON.parse(require(`${process.env.GITHUB_WORKSPACE}/sfdx-project.json`))
+            const project = require(`${process.env.GITHUB_WORKSPACE}/sfdx-project.json`)
             core.setOutput('version', project.sourceApiVersion)
 
   package-deploy:
