@@ -92,7 +92,7 @@ jobs:
         run: |
           mkdir postinstall
           mkdir postinstall/classes
-          cp -R src/classes/PostInstall.cls* postinstall/classes
+          cp -R force-app/main/default/classes/PostInstall.cls* postinstall/classes
           cat > postinstall/package.xml << EOF
           <Package xmlns="http://soap.sforce.com/2006/04/metadata">
                 <types>
