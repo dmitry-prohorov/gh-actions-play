@@ -27,8 +27,6 @@ jobs:
   package-prepare:
     runs-on: ubuntu-latest
     outputs:
-      delete-paths: ${{ steps.covert.outputs.delete-paths }}
-      has-deleted: ${{ steps.covert.outputs.has-deletes }}
       base: ${{ steps.setup.outputs.base }}
     steps:
       - name: Setup job environment
@@ -42,23 +40,6 @@ jobs:
               branch: 'master'
             })
             core.setOutput('base', masterBranch.data.commit.sha)
-      - uses: actions/checkout@v2
-      - name: Get changed files
-        id: changes
-        uses: dmitry-prohorov/file-changes-action@master
-        with:
-          pushBefore: ${{ steps.setup.outputs.base}}
-          pushAfter: ${{ github.sha}}
-      - name: Convert git changes to SFDX paths
-        id: convert
-        uses: ./.github/actions/convert-git-changes-to-sfdx-paths
-        with:
-          files: ${{ steps.changes.outputs.files }}
-          files-added: ${{ steps.changes.outputs.files_added }}
-          files-modified: ${{ steps.changes.outputs.files_modified }}
-          files-removed: ${{ steps.changes.outputs.files_removed }}
-          files-renamed: ${{ steps.changes.outputs.files_renamed }}
-          files-previous: ${{ steps.changes.outputs.files_previous }}
 
   package-deploy:
     needs: package-prepare
