@@ -30,6 +30,7 @@ jobs:
       base: ${{ steps.setup.outputs.base }}
       api-version: ${{ steps.setup.outputs.version}}
     steps:
+      - uses: actions/checkout@v2
       - name: Setup job environment
         id: setup
         uses: actions/github-script@v3
