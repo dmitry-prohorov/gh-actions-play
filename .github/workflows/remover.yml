@@ -29,12 +29,12 @@ jobs:
         run: |
           cd force-app/main/default/flows
           IFS="," read -a flows <<< $FLOWS_INPUT
-          printf '"${flows[@]}"
+          printf "${flows[@]}"
           # Now build the list of "-not -name" options from the flows array:
           for flow in "${flows[@]}"; do
               exclude_files+=( -not -name "$flow" )
           done
-          printf '"${exclude_files[@]}"
+          printf "${exclude_files[@]}"
           echo "$exclude_files[@]"
           find . -type f "$exclude_files[@]" -delete
           ls -lat force-app/main/default/flows
