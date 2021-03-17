@@ -27,6 +27,7 @@ jobs:
         env: 
           FLOWS_INPUT: ${{ github.event.inputs.keep_flows }}
         run: |
+          cd force-app/main/default/flows
           IFS="," read -a flows <<< $FLOWS_INPUT
           # Now build the list of "-not -name" options from the flows array:
           for flow in "${flows[@]}"; do
