@@ -36,7 +36,7 @@ jobs:
           done
           echo "${exclude_files[*]}"
           find . -type f "${exclude_files[@]}" -delete
-          ls -lat force-app/main/default/flows
+          ls -lat .
       - name: Remove All Flows
         if: github.event.inputs.keep_flows == ''
         run: |
