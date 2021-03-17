@@ -1,0 +1,42 @@
+# This is a basic workflow to help you get started with Actions
+
+name: RemoverCI
+
+on:
+  workflow_dispatch:
+    inputs:
+      keep_flows:
+        require: false
+        description: Skip flows and process builder from deployment
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      # Runs a single command using the runners shell
+      - name: Keep Some Flows
+        if: github.event.inputs.keep_flows != ''
+        env: 
+          FLOWS_INPUT: ${{ github.event.inputs.keep_flows }}
+        run: |
+          IFS="," read -a flows <<< $FLOWS_INPUT
+          # Now build the list of "-not -name" options from the flows array:
+          for flow in "${flows[@]}"; do
+              exclude_files+=( -not -name "$flow" )
+          done
+          echo "$exclude_files[@]"
+          find . -type f "$exclude_files[@]" -delete
+          ls -lat force-app/main/default/flows
+      - name: Remove All Flows
+        if: github.event.inputs.keep_flows == ''
+        run: |
+          rm -rf force-app/main/default/flows
+          ls -lat force-app/main/default
