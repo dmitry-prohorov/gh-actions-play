@@ -10,9 +10,104 @@ on:
         required: true
         description: Package name
         default: Dpro Play Package
+      skip_deploy:
+        require: false
+        description: Allow to skip package-deploy step
+        default: "false"
+      skip_delete:
+        require: false
+        description: Allow to skip package-delete step
+        default: "false"
+      skip_packaging:
+        require: false
+        description: Allow to skip create-package step
+        default: "false"
 
 jobs:
+  package-prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      base: ${{ steps.setup.outputs.base }}
+      api-version: ${{ steps.setup.outputs.version}}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup job environment
+        id: setup
+        uses: actions/github-script@v3
+        with:
+          script: |
+            const masterBranch = await github.repos.getBranch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              branch: 'master'
+            })
+            core.setOutput('base', masterBranch.data.commit.sha)
+
+            const project = require(`${process.env.GITHUB_WORKSPACE}/sfdx-project.json`)
+            core.setOutput('version', project.sourceApiVersion)
+
+  package-deploy:
+    needs: package-prepare
+    runs-on: ubuntu-latest
+    steps:
+      - name: Context
+        env:
+          NEEDS_CONTEXT: ${{ toJson(needs) }}
+        run: |
+          echo "$NEEDS_CONTEXT"
+      - uses: actions/checkout@v2
+        if: github.event.inputs.skip_deploy == 'false'
+      - uses: actions/setup-node@v2-beta
+        if: github.event.inputs.skip_deploy == 'false'
+        with:
+          node-version: "13.x"
+      - name: Cache node modules
+        if: github.event.inputs.skip_deploy == 'false'
+        id: cache-node-modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+      - name: Authenticate Packaging Org
+        if: github.event.inputs.skip_deploy == 'false'
+        run: |
+          echo "${SALESFORCE_JWT_SECRET_KEY}" > server.key
+          node_modules/sfdx-cli/bin/run force:auth:jwt:grant --clientid ${{ secrets.SF_UTILS_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.AUTOMATION_ORG_USERNAME }} --setdefaultdevhubusername -a packaging
+        env:
+          SALESFORCE_JWT_SECRET_KEY: ${{ secrets.UTILS_JWT_SECRET_KEY }}
+      - name: Deploy source to Packaging org
+        if: github.event.inputs.skip_deploy == 'false'
+        run: |
+          node_modules/sfdx-cli/bin/run force:source:convert -d src -r force-app/main/default -n '${{ github.event.inputs.name }}'
+          node_modules/sfdx-cli/bin/run force:mdapi:deploy -d src -w -1 -l RunLocalTests -u packaging
+
+      - name: Add postinstall script
+        if: github.event.inputs.skip_deploy == 'false'
+        run: |
+          mkdir postinstall
+          mkdir postinstall/classes
+          cp -R force-app/main/default/classes/PostInstall.cls* postinstall/classes
+          cat > postinstall/package.xml << EOF
+          <Package xmlns="http://soap.sforce.com/2006/04/metadata">
+                <types>
+                    <name>ApexClass</name>
+                    <members>PostInstall</members>
+                </types>
+                <fullName>${{ github.event.inputs.name }}</fullName>
+                <postInstallClass>PostInstall</postInstallClass>
+                <version>${{ needs.package-prepare.outputs.api-version }}</version>
+          </Package>
+          EOF
+          node_modules/sfdx-cli/bin/run force:mdapi:deploy -d postinstall -w -1 -u packaging
+
   create-package:
+    if: github.event.inputs.skip_packaging == 'false'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
