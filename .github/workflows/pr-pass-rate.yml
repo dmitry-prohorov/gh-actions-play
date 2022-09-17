@@ -26,4 +26,5 @@ jobs:
         uses: actions/github-script@v3
         with:
           script: |
-            console.log(`Github: ${JSON.stringify(github)}`)
+            console.log(`Github Event: ${JSON.stringify(github.event)}`)
+            console.log(`Github Event Review: ${JSON.stringify(github.event.review)}`)
